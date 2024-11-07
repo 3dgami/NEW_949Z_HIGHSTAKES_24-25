@@ -1,8 +1,8 @@
 #include "main.h"
-//#include "selection.h"
-//#include "selection.ccp"
+#include "autoSelect/selection.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "pros/motors.h"
+#include "pros/rtos.hpp"
 
 
 
@@ -584,8 +584,11 @@ void on_center_button() {}
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-    // print position to brain screen
-    pros::Task screen_task([&]() {
+    
+	selector::init();
+
+	//Uncomment for testing
+    /*pros::Task screen_task([&]() {
         while (true) {
             // print robot location to the brain screen
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
@@ -594,9 +597,8 @@ void initialize() {
             // delay to save resources
             pros::delay(20);
         }
-    });
+    });*/
 
-	imu.reset(true);
 }
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -631,16 +633,23 @@ void competition_initialize()
 
  // path file name is "example.txt".
 // "." is replaced with "_" to overcome c++ limitations
-ASSET(Bottom_path_pt1_txt);
-ASSET(example_txt);
-ASSET(pathjerryio_txt);
+
 ASSET(TEST1_txt);
 ASSET(TEST2_txt);
 ASSET(TEST3_txt);
 ASSET(TEST4_txt);
 
+
+ASSET(Right1_txt);
+ASSET(Right2_txt);
+ASSET(Right3_txt);
+ASSET(Right4_txt);
+ASSET(Right5_txt);
+ASSET(Right6_txt);
+
 void autonomous() 
 {
+	//robot size is 16x16 inch
 	bool ExpansionClampState;
 	bool ExpansionIntakeState;
 	auto ExpansionClamp = 'A';
@@ -651,41 +660,56 @@ void autonomous()
 
 	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
 	pros::c::adi_digital_write(ExpansionClamp, LOW);
-	//1350 one tile
 
-   // chassis.setPose(-54.465, -23.905, 0);
-	//chassis.follow(pathjerryio_txt, 10, 6000);
+	if(selector::auton == 1)//Left
+	{
+
+	} 
+	if(selector::auton == 2)//Right
+	{
+		chassis.setPose(-59.228, -24.069, 180);
+		
+		chassis.follow(Right1_txt, 15, 3000);
+		Conveyor.move_velocity(100);
+		Intake.move_velocity(600);
+		pros::c::adi_digital_write(ExpansionIntake, HIGH);
+		pros::delay(500);
+		Conveyor.move_velocity(0);
+		
+		chassis.follow(Right2_txt, 15, 3000);
+		Intake.move_velocity(0);
+		pros::c::adi_digital_write(ExpansionIntake, LOW);
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		
+		chassis.follow(Right3_txt, 15, 5000);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		Conveyor.move_velocity(100);
+		Intake.move_velocity(600);
+
+		chassis.follow(Right4_txt, 15, 5000);
+
+		chassis.follow(Right5_txt, 15, 5000);
+		Conveyor.move_velocity(0);
+		Intake.move_velocity(0);
+
+		chassis.follow(Right6_txt, 15, 5000);
+
+
+	} 
+	if(selector::auton == 0)//Skills
+	{
+
+	} 
+
+	
 	//chassis.setPose(-61.28, -9.329, 90);
+	//chassis.follow(TEST1_txt, 10, 12000);
 	//chassis.setPose(-61.469, -9.139, 90);
-	//chassis.follow(TEST2_txt, 10, 12000);
 	//chassis.follow(TEST3_txt, 10, 100000);
-	//chassis.moveToPose(-61.469, -9.139, 90, 10000);
-	chassis.setPose(-71.88, -9.888, 90);
-	chassis.follow(TEST4_txt, 15, 10000);
-	//chassis.follow(example_txt, 15, 4000);
+	//chassis.setPose(-71.88, -9.888, 90);
+	//chassis.follow(TEST4_txt, 15, 10000);
     // move 48" forwards //24 one square
-    //chassis.moveToPoint(0, 24, 10000);
-	//chassis.turnToHeading(270, 4000);
-	/*driveTrain(1350/2, 1000);
-	gyroTurn(270);
-	Conveyor.move_velocity(100);
-	pros::delay(500);
-	gyroTurn(180);
-	Intake.move_velocity(600);
-	Conveyor.move_velocity(0);
-	driveTrain(1350/2, 1000);
-	gyroTurn(225);
-	pros::c::adi_digital_write(ExpansionClamp, HIGH);
-	driveTrain(1909, 1000);
-	pros::c::adi_digital_write(ExpansionClamp, LOW);
-	gyroTurn(45);
-	driveTrain(1350, 1000);
-	gyroTurn(45);
-	driveTrain(1350*1.5, 1000);
-	gyroTurn(160);
-	Intake.move_velocity(0);
-	driveTrain(1350*3, 2000);
-	gyroTurn(335);*/
+	
 
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);

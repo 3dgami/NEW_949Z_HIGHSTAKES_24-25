@@ -1,6 +1,7 @@
 #include "main.h"
 #include "autoSelect/selection.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "pros/adi.h"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
 
@@ -639,13 +640,13 @@ ASSET(TEST2_txt);
 ASSET(TEST3_txt);
 ASSET(TEST4_txt);
 
-
+//Right side auton
 ASSET(Right1_txt);
 ASSET(Right2_txt);
-ASSET(Right3_txt);
-ASSET(Right4_txt);
-ASSET(Right5_txt);
-ASSET(Right6_txt);
+//ASSET(Right3_txt);
+//ASSET(Right4_txt);
+//ASSET(Right5_txt);
+//ASSET(Right6_txt);
 
 void autonomous() 
 {
@@ -667,32 +668,14 @@ void autonomous()
 	} 
 	if(selector::auton == 2)//Right
 	{
-		chassis.setPose(-59.228, -24.069, 180);
-		
-		chassis.follow(Right1_txt, 15, 3000);
-		Conveyor.move_velocity(100);
-		Intake.move_velocity(600);
-		pros::c::adi_digital_write(ExpansionIntake, HIGH);
-		pros::delay(500);
-		Conveyor.move_velocity(0);
-		
-		chassis.follow(Right2_txt, 15, 3000);
-		Intake.move_velocity(0);
-		pros::c::adi_digital_write(ExpansionIntake, LOW);
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		
-		chassis.follow(Right3_txt, 15, 5000);
+		chassis.setPose(-54.984, -35.014, 90);
+		chassis.follow(Right1_txt, 15, 2000, false);
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		Conveyor.move_velocity(100);
-		Intake.move_velocity(600);
+		pros::delay(500);
+		chassis.turnToHeading(180, 1000);
+		chassis.follow(Right2_txt, 15, 2000);
 
-		chassis.follow(Right4_txt, 15, 5000);
-
-		chassis.follow(Right5_txt, 15, 5000);
-		Conveyor.move_velocity(0);
-		Intake.move_velocity(0);
-
-		chassis.follow(Right6_txt, 15, 5000);
 
 
 	} 

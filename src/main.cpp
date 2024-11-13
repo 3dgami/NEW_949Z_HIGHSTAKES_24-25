@@ -643,7 +643,7 @@ ASSET(TEST4_txt);
 //Right side auton
 ASSET(Right1_txt);
 ASSET(Right2_txt);
-//ASSET(Right3_txt);
+ASSET(Right3_txt);
 //ASSET(Right4_txt);
 //ASSET(Right5_txt);
 //ASSET(Right6_txt);
@@ -669,12 +669,16 @@ void autonomous()
 	if(selector::auton == 2)//Right
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		chassis.setPose(-54.984, -35.014, 90);
+		chassis.setPose(-53.84, -30.107, 270);
 		chassis.follow(Right1_txt, 15, 2000, false);
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
 		pros::delay(500);
 		chassis.turnToHeading(180, 1000);
+		Conveyor.move_velocity(-100);
+		Intake.move_velocity(600);
 		chassis.follow(Right2_txt, 15, 2000);
+		chassis.turnToHeading(0, 1000);
+		chassis.follow(Right3_txt, 15, 2000);
 
 
 

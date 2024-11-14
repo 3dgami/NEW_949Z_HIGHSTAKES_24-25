@@ -640,18 +640,32 @@ ASSET(TEST2_txt);
 ASSET(TEST3_txt);
 ASSET(TEST4_txt);
 
-//Right side auton
+//RIGHT SIDE AUTON
 ASSET(Right1_txt);
 ASSET(Right2_txt);
 ASSET(Right3_txt);
+
+//LEFT SIDE AUTON
 ASSET(Left1_txt);
 ASSET(Left2_txt);
 ASSET(Left3_txt);
 ASSET(Left4_txt);
 
+//AUTON SKILLS
+ASSET(Skills1_txt);
+ASSET(Skills2_txt);
+ASSET(Skills3_txt);
+ASSET(Skills4_txt);
+ASSET(Skills5_txt);
+ASSET(Skills6_txt);
+ASSET(Skills7_txt);
+ASSET(Skills8_txt);
+ASSET(Skills9_txt);
+ASSET(Skills10_txt);
+
 void autonomous() 
 {
-	//robot size is 16x16 inch
+	//robot size is 12x12 inch
 	bool ExpansionClampState;
 	bool ExpansionIntakeState;
 	auto ExpansionClamp = 'A';
@@ -724,6 +738,42 @@ void autonomous()
 	} 
 	if(selector::auton == 0)//Skills
 	{
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		pros::delay(500);
+		chassis.setPose(-63.933, -16.894, 270);
+		chassis.follow(Skills1_txt, 15, 4000, false);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		pros::delay(500);
+		Conveyor.move_velocity(-100);
+		Intake.move_velocity(600);
+
+		chassis.follow(Skills2_txt, 15, 8000);
+
+		chassis.follow(Skills3_txt, 15, 4000, false);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+
+		chassis.follow(Skills4_txt, 15, 8000);
+
+		chassis.follow(Skills5_txt, 15, 8000, false);
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		chassis.turnToHeading(90, 1000);
+
+		chassis.follow(Skills6_txt, 15, 8000);
+		chassis.turnToHeading(115, 1000);
+
+		chassis.follow(Skills7_txt, 15, 8000);
+
+		chassis.follow(Skills8_txt, 15, 8000, false);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+
+		chassis.turnToHeading(315, 1000);
+		chassis.follow(Skills9_txt, 15, 8000);
+		Conveyor.move_velocity(0);
+		Intake.move_velocity(0);
+
+		chassis.follow(Skills10_txt, 15, 8000, false);
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+
 
 	} 
 

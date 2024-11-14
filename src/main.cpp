@@ -643,10 +643,11 @@ ASSET(TEST4_txt);
 //Right side auton
 ASSET(Right1_txt);
 ASSET(Right2_txt);
-//ASSET(Right3_txt);
-//ASSET(Right4_txt);
-//ASSET(Right5_txt);
-//ASSET(Right6_txt);
+ASSET(Right3_txt);
+ASSET(Left1_txt);
+ASSET(Left2_txt);
+ASSET(Left3_txt);
+ASSET(Left4_txt);
 
 void autonomous() 
 {
@@ -664,18 +665,60 @@ void autonomous()
 
 	if(selector::auton == 1)//Left
 	{
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		pros::delay(500);
+		chassis.setPose(-53.715, 40.64, 270);
+
+		chassis.follow(Left1_txt, 15, 3000, false);
+		chassis.turnToHeading(0, 1000);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		pros::delay(500);
+		Conveyor.move_velocity(-100);
+		Intake.move_velocity(600);
+
+		chassis.follow(Left2_txt, 15, 3000);
+		Intake.move_velocity(0);
+		pros::delay(500);
+		chassis.turnToHeading(90, 1000);
+		Intake.move_velocity(600);
+
+		chassis.follow(Left3_txt, 15, 3000);
+		pros::delay(1000);
+		//Intake.move_velocity(0);
+		pros::delay(1000);
+		chassis.turnToHeading(270, 1000);
+		Intake.move_velocity(0);
+	
+
+		chassis.follow(Left4_txt, 15, 3000);
+
+		Intake.move_velocity(0);
+		Conveyor.move_velocity(0);
+		Intake.move_velocity(0);
 
 	} 
 	if(selector::auton == 2)//Right
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		chassis.setPose(-54.984, -35.014, 90);
-		chassis.follow(Right1_txt, 15, 2000, false);
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
 		pros::delay(500);
-		chassis.turnToHeading(180, 1000);
-		chassis.follow(Right2_txt, 15, 2000);
+		chassis.setPose(-54.984, -35.014, 270);
+		chassis.follow(Right1_txt, 15, 3000, false);
+		pros::delay(1000);
 
+
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		Conveyor.move_velocity(-100);
+		Intake.move_velocity(600);
+
+
+		pros::delay(1000);
+		chassis.turnToHeading(180, 1000);
+		chassis.follow(Right2_txt, 15, 3000);
+
+		chassis.turnToHeading(0, 1000);
+		chassis.follow(Right3_txt, 15, 3000);
+		Conveyor.move_velocity(0);
+		Intake.move_velocity(0);
 
 
 	} 
@@ -799,11 +842,12 @@ void opcontrol()
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
 		}
 
+		//REVERSE INTAKE
 		if(master.get_digital_new_press(DIGITAL_B))
 		{
 			if(IntakeState == true)
 			{
-				Conveyor.move_velocity(-300);
+				Intake.move_velocity(-600);
 				
 			}
 			printf("Intake state=%d intake velocity=%f \n", IntakeState, Intake.get_actual_velocity());
@@ -829,7 +873,7 @@ void opcontrol()
 		}
 
 		//MOGO CLAMP
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			if(ExpansionClampState == true)
 			{
@@ -846,7 +890,7 @@ void opcontrol()
 		
 
 		//NUETRAL STAKE EXPANSION
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
 		{
 			if(ExpansionNeutral == true)
 			{
@@ -897,6 +941,7 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionIntakeState);
 		}
 
+		//CHECK SPEED
 		if(Conveyor.get_actual_velocity() > -10 and top_speed == true)
 		{
 
@@ -906,6 +951,7 @@ void opcontrol()
 			top_speed = false;
 		}
 
+		//UNSTUCK CONVEYOR
 		if(Conveyor.get_actual_velocity() <= -80 and IntakeState == true)
 		{
 			top_speed = true;

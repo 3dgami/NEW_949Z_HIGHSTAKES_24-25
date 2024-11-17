@@ -636,17 +636,17 @@ void competition_initialize()
  // path file name is "example.txt".
 // "." is replaced with "_" to overcome c++ limitations
 
-ASSET(TEST1_txt);
-ASSET(TEST2_txt);
-ASSET(TEST3_txt);
-ASSET(TEST4_txt);
+//RIGHT SIDE AUTON RED
+ASSET(R1RED_txt);
+ASSET(R2RED_txt);
+ASSET(R3RED_txt);
 
-//RIGHT SIDE AUTON
-ASSET(Right1_txt);
-ASSET(Right2_txt);
-ASSET(Right3_txt);
+//RIGHT SIDE AUTON BLUE
+ASSET(R1BLUE_txt);
+ASSET(R2BLUE_txt);
+ASSET(R3BLUE_txt);
 
-//LEFT SIDE AUTON
+//LEFT SIDE AUTON RED
 ASSET(Left1_txt);
 ASSET(Left2_txt);
 ASSET(Left3_txt);
@@ -654,21 +654,14 @@ ASSET(Left35_txt);
 ASSET(Left4_txt);
 ASSET(Left5_txt);
 
+//LEFT SIDE AUTON BLUE
+
 //AUTON SKILLS
-ASSET(Skills1_txt);
-ASSET(Skills2_txt);
-ASSET(Skills3_txt);
-ASSET(Skills4_txt);
-ASSET(Skills5_txt);
-ASSET(Skills6_txt);
-ASSET(Skills7_txt);
-ASSET(Skills8_txt);
-ASSET(Skills9_txt);
-ASSET(Skills10_txt);
+
 
 void autonomous() 
 {
-	//robot size is 12x12 inch
+	//robot size is 16x16 inch
 	bool ExpansionClampState;
 	bool ExpansionIntakeState;
 	auto ExpansionClamp = 'A';
@@ -680,7 +673,7 @@ void autonomous()
 	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
 	pros::c::adi_digital_write(ExpansionClamp, LOW);
 
-	if(selector::auton == 1)//Left
+	if(selector::auton == 1)//RED LEFT
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
 		pros::delay(500);
@@ -723,12 +716,12 @@ void autonomous()
 		Intake.move_velocity(0);
 
 	} 
-	if(selector::auton == 2)//Right
+	if(selector::auton == 2)//RED RIGHT
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
 		pros::delay(500);
 		chassis.setPose(-54.984, -35.014, 270);
-		chassis.follow(Right1_txt, 15, 3000, false);
+		chassis.follow(R1RED_txt, 15, 3000, false);
 		pros::delay(1000);
 
 
@@ -740,132 +733,50 @@ void autonomous()
 
 		pros::delay(1000);
 		chassis.turnToHeading(180, 1000);
-		chassis.follow(Right2_txt, 15, 3000);
+		chassis.follow(R2RED_txt, 15, 3000);
 		pros::delay(500);
 
 		chassis.turnToHeading(0, 1000);
-		chassis.follow(Right3_txt, 15, 3000);
+		chassis.follow(R3RED_txt, 15, 3000);
 		Conveyor.move_velocity(0);
 		Intake.move_velocity(0);
 
 
 	} 
-	if(selector::auton == -1)//LEFT
+	if(selector::auton == -1)//BLUE LEFT
 	{
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		pros::delay(500);
-		chassis.setPose(-54.984, -35.014, 270);
-		chassis.follow(Right1_txt, 15, 3000, false);
-		pros::delay(1000);
-
-
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		Intake.move_velocity(600);
-		Conveyor.move_velocity(-100);
-		
-
-
-		pros::delay(1000);
-		chassis.turnToHeading(180, 1000);
-		chassis.follow(Right2_txt, 15, 3000);
-		pros::delay(500);
-
-		chassis.turnToHeading(0, 1000);
-		chassis.follow(Right3_txt, 15, 3000);
 	}
 
-	if(selector::auton == -2)//Right
+	if(selector::auton == -2)//BLUE RIGHT
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
 		pros::delay(500);
-		chassis.setPose(-53.715, 40.64, 270);
+		chassis.setPose(-54.984, -35.014, 270);
+		chassis.follow(R1BLUE_txt, 15, 3000, false);
+		pros::delay(1000);
 
-		chassis.follow(Left1_txt, 15, 3000, false);
-		chassis.turnToHeading(0, 1000);
+
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		
 		Intake.move_velocity(600);
-		pros::delay(500);
 		Conveyor.move_velocity(-100);
-
-		chassis.follow(Left2_txt, 15, 3000);
 		
+
+
 		pros::delay(1000);
-		Intake.move_velocity(0);
-		pros::delay(700);
-		//Intake.move_velocity(0);
 		chassis.turnToHeading(180, 1000);
-		Intake.move_velocity(600);
+		chassis.follow(R2BLUE_txt, 15, 3000);
+		pros::delay(500);
 
-		chassis.follow(Left3_txt, 10, 3000);
-		pros::delay(1000);
-		chassis.turnToHeading(90, 1000);
-		chassis.follow(Left35_txt, 10, 3000);
-		chassis.turnToHeading(270, 1000);
-		pros::delay(1000);
-
-
-		chassis.follow(Left4_txt, 15, 3000);
-		pros::delay(1000);
-		//chassis.turnToHeading(180, 1000);
-		pros::delay(1000);
-
-		//chassis.follow(Left5_txt, 15, 3000);
-
-		Intake.move_velocity(0);
+		chassis.turnToHeading(0, 1000);
+		chassis.follow(R3BLUE_txt, 15, 3000);
 		Conveyor.move_velocity(0);
 		Intake.move_velocity(0);
+
 	}
 
 	if(selector::auton == 0)//Skills
 	{
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		pros::delay(500);
-		chassis.setPose(-45.875, -7.747, 270);
-		chassis.follow(Skills1_txt, 15, 4000, false);
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		pros::delay(500);
-		Conveyor.move_velocity(-100);
-		Intake.move_velocity(600);
-
-		chassis.follow(Skills2_txt, 15, 8000);
-
-		chassis.follow(Skills3_txt, 15, 4000, false);
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-
-		chassis.follow(Skills4_txt, 15, 8000);
-
-		chassis.follow(Skills5_txt, 15, 8000, false);
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		chassis.turnToHeading(90, 1000);
-
-		chassis.follow(Skills6_txt, 15, 8000);
-		chassis.turnToHeading(115, 1000);
-
-		chassis.follow(Skills7_txt, 15, 8000);
-
-		chassis.follow(Skills8_txt, 15, 8000, false);
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-
-		chassis.turnToHeading(315, 1000);
-		chassis.follow(Skills9_txt, 15, 8000);
-		Conveyor.move_velocity(0);
-		Intake.move_velocity(0);
-
-		chassis.follow(Skills10_txt, 15, 8000, false);
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-
-
 	} 
-
-	
-	//chassis.setPose(-61.28, -9.329, 90);
-	//chassis.follow(TEST1_txt, 10, 12000);
-	//chassis.setPose(-61.469, -9.139, 90);
-	//chassis.follow(TEST3_txt, 10, 100000);
-	//chassis.setPose(-71.88, -9.888, 90);
-	//chassis.follow(TEST4_txt, 15, 10000);
-    // move 48" forwards //24 one square
 	
 	Conveyor.move_velocity(0);
 	Intake.move_velocity(0);
@@ -895,11 +806,13 @@ void opcontrol()
 	int right;
 	double Hue;
 	bool IntakeState;
+	bool IntakeREV;
 	bool ExpansionClampState;
 	bool ExpansionNeutral;
 	bool ExpansionIntakeState;
 	bool DoinkerState;
 	bool top_speed;
+
 	top_speed = false;
 	auto ExpansionClamp = 'A';
 	auto ExpansionIntake ='D';
@@ -922,8 +835,6 @@ void opcontrol()
 	pros::c::adi_pin_mode(Doinker, OUTPUT);
 	pros::c::adi_digital_write(Doinker, LOW);
 
-	//pros::c::adi_digital_write(ExpansionClamp, HIGH);
-
 	while(true){
 		
 		/*TANK CONTROL*/
@@ -934,7 +845,6 @@ void opcontrol()
 		*/
 
 		/*CURVATURE CONTROL*/
-		// get left y and right x positions
 		/*
         int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
@@ -977,17 +887,25 @@ void opcontrol()
 		//REVERSE INTAKE
 		if(master.get_digital_new_press(DIGITAL_B))
 		{
-			if(IntakeState == true)
+			if(IntakeREV == true)
 			{
-				Intake.move_velocity(-600);
-				Conveyor.move_velocity(100);
-				
+				Conveyor.move_velocity(0);
+				Intake.move_velocity(0);
+				IntakeREV = false;
 			}
-			printf("Intake state=%d intake velocity=%f \n", IntakeState, Intake.get_actual_velocity());
+			else
+			{
+				Conveyor.move_velocity(-100);
+				Intake.move_velocity(600);
+				IntakeREV = false;
+			}
+			top_speed = false;
+			IntakeState = false;
+			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
 		}
 
 
-		//COLOR SORT BLUE ALLIANCE
+		/*//COLOR SORT BLUE ALLIANCE
 		Hue = Color_sensor.get_hue(); 
 		if(Hue == 0 and IntakeState == true)
 		{
@@ -995,7 +913,7 @@ void opcontrol()
 			pros::c::delay(300);
 			Conveyor.move_velocity(-100);
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
-		}
+		}*/
 
 		//AUTO CLAMP
 		if(Distance_clamp.get() <= 20 and ExpansionClampState == false)
@@ -1090,13 +1008,6 @@ void opcontrol()
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);
 		}
-
-		//printf("top_speed=%d \n", top_speed);
-
-		//int pos = getPos();
-		//printf("pos=%d \n", pos);
-		//double motor_pos = right_back.get_position();
-		//printf("pos=%f \n", motor_pos);
 
 		pros::delay(5);
 	};

@@ -2,6 +2,7 @@
 #include "autoSelect/selection.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "pros/adi.h"
+#include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/rtos.hpp"
 
@@ -649,7 +650,9 @@ ASSET(Right3_txt);
 ASSET(Left1_txt);
 ASSET(Left2_txt);
 ASSET(Left3_txt);
+ASSET(Left35_txt);
 ASSET(Left4_txt);
+ASSET(Left5_txt);
 
 //AUTON SKILLS
 ASSET(Skills1_txt);
@@ -686,25 +689,34 @@ void autonomous()
 		chassis.follow(Left1_txt, 15, 3000, false);
 		chassis.turnToHeading(0, 1000);
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		
+		Intake.move_velocity(600);
 		pros::delay(500);
 		Conveyor.move_velocity(-100);
-		Intake.move_velocity(600);
 
 		chassis.follow(Left2_txt, 15, 3000);
+		
+		pros::delay(1000);
 		Intake.move_velocity(0);
-		pros::delay(500);
-		chassis.turnToHeading(90, 1000);
+		pros::delay(700);
+		//Intake.move_velocity(0);
+		chassis.turnToHeading(180, 1000);
 		Intake.move_velocity(600);
 
-		chassis.follow(Left3_txt, 15, 3000);
+		chassis.follow(Left3_txt, 10, 3000);
 		pros::delay(1000);
-		//Intake.move_velocity(0);
-		pros::delay(1000);
+		chassis.turnToHeading(90, 1000);
+		chassis.follow(Left35_txt, 10, 3000);
 		chassis.turnToHeading(270, 1000);
-		Intake.move_velocity(0);
-	
+		pros::delay(1000);
+
 
 		chassis.follow(Left4_txt, 15, 3000);
+		pros::delay(1000);
+		//chassis.turnToHeading(180, 1000);
+		pros::delay(1000);
+
+		//chassis.follow(Left5_txt, 15, 3000);
 
 		Intake.move_velocity(0);
 		Conveyor.move_velocity(0);
@@ -721,13 +733,15 @@ void autonomous()
 
 
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		Conveyor.move_velocity(-100);
 		Intake.move_velocity(600);
+		Conveyor.move_velocity(-100);
+		
 
 
 		pros::delay(1000);
 		chassis.turnToHeading(180, 1000);
 		chassis.follow(Right2_txt, 15, 3000);
+		pros::delay(500);
 
 		chassis.turnToHeading(0, 1000);
 		chassis.follow(Right3_txt, 15, 3000);
@@ -736,11 +750,78 @@ void autonomous()
 
 
 	} 
+	if(selector::auton == -1)//LEFT
+	{
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		pros::delay(500);
+		chassis.setPose(-54.984, -35.014, 270);
+		chassis.follow(Right1_txt, 15, 3000, false);
+		pros::delay(1000);
+
+
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		Intake.move_velocity(600);
+		Conveyor.move_velocity(-100);
+		
+
+
+		pros::delay(1000);
+		chassis.turnToHeading(180, 1000);
+		chassis.follow(Right2_txt, 15, 3000);
+		pros::delay(500);
+
+		chassis.turnToHeading(0, 1000);
+		chassis.follow(Right3_txt, 15, 3000);
+	}
+
+	if(selector::auton == -2)//Right
+	{
+		pros::c::adi_digital_write(ExpansionClamp, HIGH);
+		pros::delay(500);
+		chassis.setPose(-53.715, 40.64, 270);
+
+		chassis.follow(Left1_txt, 15, 3000, false);
+		chassis.turnToHeading(0, 1000);
+		pros::c::adi_digital_write(ExpansionClamp, LOW);
+		
+		Intake.move_velocity(600);
+		pros::delay(500);
+		Conveyor.move_velocity(-100);
+
+		chassis.follow(Left2_txt, 15, 3000);
+		
+		pros::delay(1000);
+		Intake.move_velocity(0);
+		pros::delay(700);
+		//Intake.move_velocity(0);
+		chassis.turnToHeading(180, 1000);
+		Intake.move_velocity(600);
+
+		chassis.follow(Left3_txt, 10, 3000);
+		pros::delay(1000);
+		chassis.turnToHeading(90, 1000);
+		chassis.follow(Left35_txt, 10, 3000);
+		chassis.turnToHeading(270, 1000);
+		pros::delay(1000);
+
+
+		chassis.follow(Left4_txt, 15, 3000);
+		pros::delay(1000);
+		//chassis.turnToHeading(180, 1000);
+		pros::delay(1000);
+
+		//chassis.follow(Left5_txt, 15, 3000);
+
+		Intake.move_velocity(0);
+		Conveyor.move_velocity(0);
+		Intake.move_velocity(0);
+	}
+
 	if(selector::auton == 0)//Skills
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
 		pros::delay(500);
-		chassis.setPose(-63.933, -16.894, 270);
+		chassis.setPose(-45.875, -7.747, 270);
 		chassis.follow(Skills1_txt, 15, 4000, false);
 		pros::c::adi_digital_write(ExpansionClamp, LOW);
 		pros::delay(500);
@@ -786,7 +867,8 @@ void autonomous()
 	//chassis.follow(TEST4_txt, 15, 10000);
     // move 48" forwards //24 one square
 	
-
+	Conveyor.move_velocity(0);
+	Intake.move_velocity(0);
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
 	printf("done");
@@ -898,6 +980,7 @@ void opcontrol()
 			if(IntakeState == true)
 			{
 				Intake.move_velocity(-600);
+				Conveyor.move_velocity(100);
 				
 			}
 			printf("Intake state=%d intake velocity=%f \n", IntakeState, Intake.get_actual_velocity());
@@ -923,7 +1006,7 @@ void opcontrol()
 		}
 
 		//MOGO CLAMP
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			if(ExpansionClampState == true)
 			{
@@ -940,7 +1023,7 @@ void opcontrol()
 		
 
 		//NUETRAL STAKE EXPANSION
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
 			if(ExpansionNeutral == true)
 			{
@@ -976,7 +1059,7 @@ void opcontrol()
 		}
 
 		//DOINKER
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			if(DoinkerState == true)
 			{
@@ -1002,7 +1085,7 @@ void opcontrol()
 		}
 
 		//UNSTUCK CONVEYOR
-		if(Conveyor.get_actual_velocity() <= -80 and IntakeState == true)
+		if(Conveyor.get_actual_velocity() <= -40 and IntakeState == true)
 		{
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);

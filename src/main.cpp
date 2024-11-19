@@ -1,5 +1,6 @@
 #include "main.h"
 #include "autoSelect/selection.h"
+#include "Master-Selector/api.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "pros/adi.h"
 #include "pros/misc.h"
@@ -574,6 +575,88 @@ void AbsGyroTurn(int angle)
 	return;
 }
 
+
+//AUTON//
+
+//RIGHT SIDE AUTON RED
+ASSET(R1RED_txt);
+ASSET(R2RED_txt);
+ASSET(R3RED_txt);
+
+//RIGHT SIDE AUTON BLUE
+ASSET(R1BLUE_txt);
+ASSET(R2BLUE_txt);
+ASSET(R3BLUE_txt);
+
+//LEFT SIDE AUTON RED
+ASSET(Left1_txt);
+ASSET(Left2_txt);
+ASSET(Left3_txt);
+ASSET(Left35_txt);
+ASSET(Left4_txt);
+ASSET(Left5_txt);
+
+//LEFT SIDE AUTON BLUE
+
+//AUTON SKILLS
+
+
+//RIGHT SIDE AUTON//
+
+// RED Alliance Right Side and gets the auton win point
+void RED_Right_side_awp() {
+    // ...
+}
+
+// RED Alliance Right Side for elimination rounds
+void RED_Right_side_elims() {
+    // ...
+}
+
+// Blue Alliance Right Side and gets the auton win point
+void BLUE_Right_side_awp() {
+    // ...
+}
+
+// Blue Alliance Right Side elimination rounds
+void BLUE_Right_side_elims() {
+    // ...
+}
+
+
+
+
+
+//LEFT SIDE AUTON//
+
+// RED Alliance Left Side and gets the auton win point
+void RED_LEFT_side_awp() {
+    // ...
+}
+
+// RED Alliance Left Side elimination rounds
+void RED_LEFT_side_elims() {
+    // ...
+}
+// Blue Alliance Left Side and gets the auton win point
+void BLUE_LEFT_side_awp() {
+    // ...
+}
+
+// Blue Alliance Left Side for elimination rounds
+void BLUE_LEFT_side_elims() {
+    // ...
+}
+
+
+
+
+//SKILLS//
+void skills() {
+    // ...
+}
+
+
 void on_center_button() {}
 
 /**
@@ -584,10 +667,33 @@ void on_center_button() {}
  */
 // initialize function. Runs on program startup
 void initialize() {
-    pros::lcd::initialize(); // initialize brain screen
+    //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
+
+	ms::set_autons({  // Vector of categories
+        ms::Category("Red Right Side", {
+            ms::Auton("Auton Win Point", RED_Right_side_awp),
+            ms::Auton("Eliminations", RED_Right_side_elims)
+        }),
+		ms::Category("Red Left Side", {
+            ms::Auton("Auton Win Point", RED_LEFT_side_awp),
+            ms::Auton("Eliminations", RED_LEFT_side_elims)
+        }),
+		ms::Category("Blue Right Side", {
+            ms::Auton("Auton Win Point", BLUE_Right_side_awp),
+            ms::Auton("Eliminations", BLUE_Right_side_elims)
+        }),
+		ms::Category("Blue Left Side", {
+            ms::Auton("Auton Win Point", BLUE_LEFT_side_awp),
+            ms::Auton("Eliminations", BLUE_LEFT_side_elims)
+        }),
+        ms::Category("Skills", {
+            ms::Auton("Skills", skills)
+        })
+    });
+    ms::initialize(); // Initialize the screen
     
-	selector::init();
+	//selector::init();
 
 	//Uncomment for testing
     /*pros::Task screen_task([&]() {
@@ -637,28 +743,6 @@ void competition_initialize()
  // path file name is "example.txt".
 // "." is replaced with "_" to overcome c++ limitations
 
-//RIGHT SIDE AUTON RED
-ASSET(R1RED_txt);
-ASSET(R2RED_txt);
-ASSET(R3RED_txt);
-
-//RIGHT SIDE AUTON BLUE
-ASSET(R1BLUE_txt);
-ASSET(R2BLUE_txt);
-ASSET(R3BLUE_txt);
-
-//LEFT SIDE AUTON RED
-ASSET(Left1_txt);
-ASSET(Left2_txt);
-ASSET(Left3_txt);
-ASSET(Left35_txt);
-ASSET(Left4_txt);
-ASSET(Left5_txt);
-
-//LEFT SIDE AUTON BLUE
-
-//AUTON SKILLS
-
 
 void autonomous() 
 {
@@ -674,6 +758,9 @@ void autonomous()
 	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
 	pros::c::adi_digital_write(ExpansionClamp, LOW);
 
+	ms::call_selected_auton();
+
+	/*
 	if(selector::auton == 1)//RED LEFT
 	{
 		pros::c::adi_digital_write(ExpansionClamp, HIGH);
@@ -777,7 +864,7 @@ void autonomous()
 
 	if(selector::auton == 0)//Skills
 	{
-	} 
+	} */
 	
 	Conveyor.move_velocity(0);
 	Intake.move_velocity(0);

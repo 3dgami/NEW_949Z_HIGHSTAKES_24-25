@@ -1,10 +1,13 @@
 #include "main.h"
-#include "autoSelect/selection.h"
+//#include "autoSelect/selection.h"
 #include "Master-Selector/api.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "pros/adi.h"
+#include "pros/adi.hpp"
+#include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/motors.h"
+#include "pros/rotation.hpp"
 #include "pros/rtos.hpp"
 
 
@@ -26,7 +29,28 @@ pros::MotorGroup driveL_train({11, 12});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({10, 1});
 pros::MotorGroup full_drivetrain({11, 12, 10, 1});
 pros::IMU imu(3);
+pros::Rotation RotationX(4);
+pros::Rotation RotationY(9);
 //pros::IMU imu2(9);
+
+bool ExpansionClampState;
+bool ExpansionIntakeState;
+bool ExpansionNeutral;
+bool DoinkerState;
+
+pros::ADIDigitalOut ExpansionIntake('D');
+pros::ADIDigitalOut ExpansionClamp('A');
+pros::ADIDigitalOut NuetralStake('C');
+pros::ADIDigitalOut NuetralStake2('B');
+pros::ADIDigitalOut Doinker('E');
+
+
+// horizontal tracking wheel
+lemlib::TrackingWheel horizontal_tracking_wheel(&RotationX, lemlib::Omniwheel::NEW_2, 5.7);
+
+// vertical tracking wheel
+lemlib::TrackingWheel vertical_tracking_wheel(&RotationY, lemlib::Omniwheel::NEW_2, -3);
+
 
 pros::MotorGroup driveL_trainLem({-11, -12});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_trainLem({10, 1});
@@ -35,7 +59,7 @@ pros::MotorGroup driveR_trainLem({10, 1});
 lemlib::Drivetrain drivetrain(&driveL_trainLem, // left motor group
                               &driveR_trainLem, // right motor group
                               14, // 10 inch track width
-                              lemlib::Omniwheel::NEW_325, // using new 4" omnis
+                              lemlib::Omniwheel::NEW_325, // using new 3,25" omnis
                               300, // drivetrain rpm is 360
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
@@ -65,9 +89,9 @@ lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
+lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
-                            nullptr, // horizontal tracking wheel
+                            &horizontal_tracking_wheel, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
                             &imu // inertial sensor
 );
@@ -578,25 +602,41 @@ void AbsGyroTurn(int angle)
 
 //AUTON//
 
-//RIGHT SIDE AUTON RED
+//RIGHT SIDE AUTON RED AWP
 ASSET(R1RED_txt);
 ASSET(R2RED_txt);
 ASSET(R3RED_txt);
 
-//RIGHT SIDE AUTON BLUE
+//RIGHT SIDE AUTON RED ELIMS
+
+//RIGHT SIDE AUTON BLUE AWP
 ASSET(R1BLUE_txt);
 ASSET(R2BLUE_txt);
 ASSET(R3BLUE_txt);
 
-//LEFT SIDE AUTON RED
-ASSET(Left1_txt);
-ASSET(Left2_txt);
-ASSET(Left3_txt);
-ASSET(Left35_txt);
-ASSET(Left4_txt);
-ASSET(Left5_txt);
+//RIGHT SIDE AUTON BLUE ELIMS
 
-//LEFT SIDE AUTON BLUE
+//LEFT SIDE AUTON RED AWP
+ASSET(NewLeft1_txt);
+ASSET(NewLeft2_txt);
+ASSET(NewLeft25_txt);
+ASSET(NewLeft3_txt);
+ASSET(NewLeft35_txt);
+ASSET(NewLeft4_txt);
+ASSET(NewLeft45_txt);
+ASSET(NewLeft5_txt);
+ASSET(NewLeft55_txt);
+ASSET(NewLeft6_txt);
+ASSET(NewLeft6ELIMS_txt);
+ASSET(NewLeft7_txt);
+ASSET(NewLeft7ELIMS_txt);
+
+
+//LEFT SIDE AUTON RED ELIMS
+
+//LEFT SIDE AUTON BLUE AWP
+
+//LEFT SIDE AUTON BLUE ELIMS
 
 //AUTON SKILLS
 
@@ -605,7 +645,28 @@ ASSET(Left5_txt);
 
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
-    // ...
+	ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+	chassis.setPose(-54.984, -35.014, 270);
+	chassis.follow(R1RED_txt, 15, 3000, false);
+	pros::delay(1000);
+
+
+	ExpansionClamp.set_value(LOW);
+	Intake.move_velocity(600);
+	Conveyor.move_velocity(-100);
+		
+
+
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(R2RED_txt, 15, 3000);
+	pros::delay(500);
+
+	chassis.turnToHeading(0, 1000);
+	chassis.follow(R3RED_txt, 15, 3000);
+	Conveyor.move_velocity(0);
+	Intake.move_velocity(0);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -615,7 +676,28 @@ void RED_Right_side_elims() {
 
 // Blue Alliance Right Side and gets the auton win point
 void BLUE_Right_side_awp() {
-    // ...
+    ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+	chassis.setPose(-54.984, -35.014, 270);
+	chassis.follow(R1BLUE_txt, 15, 3000, false);
+	pros::delay(1000);
+
+
+	ExpansionClamp.set_value(LOW);
+	Intake.move_velocity(600);
+	Conveyor.move_velocity(-100);
+		
+
+
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(R2BLUE_txt, 15, 3000);
+	pros::delay(500);
+
+	chassis.turnToHeading(0, 1000);
+	chassis.follow(R3BLUE_txt, 15, 3000);
+	//Conveyor.move_velocity(0);
+	Intake.move_velocity(0);
 }
 
 // Blue Alliance Right Side elimination rounds
@@ -624,19 +706,85 @@ void BLUE_Right_side_elims() {
 }
 
 
-
-
-
 //LEFT SIDE AUTON//
 
 // RED Alliance Left Side and gets the auton win point
+//still testing not final
 void RED_LEFT_side_awp() {
-    // ...
+    ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+	chassis.setPose(-53.715, 40.64, 270);
+	ExpansionClamp.set_value(HIGH);
+
+	chassis.follow(NewLeft1_txt, 15, 3000, false);
+	ExpansionClamp.set_value(LOW);
+	chassis.turnToHeading(0, 1000);
+	Conveyor.move_velocity(-100);
+	Intake.move_velocity(600);
+
+	chassis.follow(NewLeft2_txt, 15, 3000);
+
+	chassis.follow(NewLeft2_txt, 15, 3000, false);
+		
+	chassis.follow(NewLeft3_txt, 10, 3000);
+	pros::delay(750);
+
+	chassis.follow(NewLeft35_txt, 10, 3000, false);
+
+	chassis.follow(NewLeft4_txt, 10, 3000, false);
+
+	chassis.follow(NewLeft45_txt, 10, 3000);
+	pros::delay(750);
+
+	chassis.follow(NewLeft5_txt, 15, 3000, false);
+	pros::delay(750);
+
+	chassis.follow(NewLeft55_txt, 15, 3000);
+
+	chassis.follow(NewLeft6_txt, 15, 3000, false);
+	Intake.move_velocity(0);
+
+	chassis.follow(NewLeft7_txt, 15, 3000);
 }
 
 // RED Alliance Left Side elimination rounds
 void RED_LEFT_side_elims() {
-    // ...
+     ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+	chassis.setPose(-53.715, 40.64, 270);
+	ExpansionClamp.set_value(HIGH);
+
+	chassis.follow(NewLeft1_txt, 15, 3000, false);
+	ExpansionClamp.set_value(LOW);
+	chassis.turnToHeading(0, 1000);
+	Conveyor.move_velocity(-100);
+	Intake.move_velocity(600);
+
+	chassis.follow(NewLeft2_txt, 15, 3000);
+
+	chassis.follow(NewLeft2_txt, 15, 3000, false);
+		
+	chassis.follow(NewLeft3_txt, 10, 3000);
+	pros::delay(750);
+
+	chassis.follow(NewLeft35_txt, 10, 3000, false);
+
+	chassis.follow(NewLeft4_txt, 10, 3000, false);
+
+	chassis.follow(NewLeft45_txt, 10, 3000);
+	pros::delay(750);
+
+	chassis.follow(NewLeft5_txt, 15, 3000, false);
+	pros::delay(750);
+
+	chassis.follow(NewLeft55_txt, 15, 3000);
+
+	chassis.follow(NewLeft6ELIMS_txt, 15, 4000, false);
+	ExpansionClamp.set_value(HIGH);
+	pros::delay(750);
+	chassis.turnToHeading(326, 1000);
+
+	chassis.follow(NewLeft7ELIMS_txt, 15, 3000, false);
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
@@ -647,8 +795,6 @@ void BLUE_LEFT_side_awp() {
 void BLUE_LEFT_side_elims() {
     // ...
 }
-
-
 
 
 //SKILLS//
@@ -665,38 +811,36 @@ void on_center_button() {}
  * All other competition modes are blocked by initialize; it is recommended
  * to keep execution time for this mode under a few seconds.
  */
-// initialize function. Runs on program startup
 void initialize() {
-    //pros::lcd::initialize(); // initialize brain screen
+    pros::lcd::initialize(); // initialize brain screen
+	pros::lcd::set_text_color(0,255,200);
+	//pros::lcd::set_background_color(84, 64, 64);
     chassis.calibrate(); // calibrate sensors
-
+	//chassis.setPose(-53.715, 40.64, 270);//FOR TESTING REMOVE WHEN DONE
+	/*
 	ms::set_autons({  // Vector of categories
-        ms::Category("Red Right Side", {
-            ms::Auton("Auton Win Point", RED_Right_side_awp),
-            ms::Auton("Eliminations", RED_Right_side_elims)
+        ms::Category("Red", {
+            ms::Auton("Right Side AWP", RED_Right_side_awp),
+            ms::Auton("Right Side ELIMS", RED_Right_side_elims),
+			ms::Auton("Left Side AWP", RED_LEFT_side_awp),
+            ms::Auton("Left Side ELIMS", RED_LEFT_side_elims)
         }),
-		ms::Category("Red Left Side", {
-            ms::Auton("Auton Win Point", RED_LEFT_side_awp),
-            ms::Auton("Eliminations", RED_LEFT_side_elims)
-        }),
-		ms::Category("Blue Right Side", {
-            ms::Auton("Auton Win Point", BLUE_Right_side_awp),
-            ms::Auton("Eliminations", BLUE_Right_side_elims)
-        }),
-		ms::Category("Blue Left Side", {
-            ms::Auton("Auton Win Point", BLUE_LEFT_side_awp),
-            ms::Auton("Eliminations", BLUE_LEFT_side_elims)
+		ms::Category("Blue", {
+            ms::Auton("Right Side AWP", BLUE_Right_side_awp),
+            ms::Auton("Right Side ELIMS", BLUE_Right_side_elims),
+			ms::Auton("Left Side AWP", BLUE_LEFT_side_awp),
+            ms::Auton("Left Side ELIMS", BLUE_LEFT_side_elims)
         }),
         ms::Category("Skills", {
             ms::Auton("Skills", skills)
         })
     });
     ms::initialize(); // Initialize the screen
+	*/
     
-	//selector::init();
-
-	//Uncomment for testing
-    /*pros::Task screen_task([&]() {
+	/*
+	//Uncomment for testing COMMENT FOR TOURNEMENTS
+    pros::Task screen_task([&]() {
         while (true) {
             // print robot location to the brain screen
             pros::lcd::print(0, "X: %f", chassis.getPose().x); // x
@@ -706,6 +850,16 @@ void initialize() {
             pros::delay(20);
         }
     });*/
+
+	//find if tracking wheels are reversed or not
+    while (true) 
+	{ 
+        // print measurements from the rotation sensor X
+        pros::lcd::print(0, "Rotation Sensor: %i", RotationX.get_position());
+        // print measurements from the rotation sensor Y
+        pros::lcd::print(1, "Rotation Sensor: %i", RotationY.get_position());
+        pros::delay(10);
+	}
 
 }
 /**
@@ -747,125 +901,10 @@ void competition_initialize()
 void autonomous() 
 {
 	//robot size is 16x16 inch
-	bool ExpansionClampState;
-	bool ExpansionIntakeState;
-	auto ExpansionClamp = 'A';
-	auto ExpansionIntake ='D';
-
-	pros::c::adi_pin_mode(ExpansionIntake, OUTPUT);
-	pros::c::adi_digital_write(ExpansionIntake, LOW);
-
-	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
-	pros::c::adi_digital_write(ExpansionClamp, LOW);
 
 	ms::call_selected_auton();
 
-	/*
-	if(selector::auton == 1)//RED LEFT
-	{
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		pros::delay(500);
-		chassis.setPose(-53.715, 40.64, 270);
-
-		chassis.follow(Left1_txt, 15, 3000, false);
-		chassis.turnToHeading(0, 1000);
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		
-		Intake.move_velocity(600);
-		pros::delay(500);
-		Conveyor.move_velocity(-100);
-
-		chassis.follow(Left2_txt, 15, 3000);
-		
-		pros::delay(1000);
-		Intake.move_velocity(0);
-		pros::delay(700);
-		//Intake.move_velocity(0);
-		chassis.turnToHeading(180, 1000);
-		Intake.move_velocity(600);
-
-		chassis.follow(Left3_txt, 10, 3000);
-		pros::delay(1000);
-		chassis.turnToHeading(90, 1000);
-		chassis.follow(Left35_txt, 10, 3000);
-		chassis.turnToHeading(270, 1000);
-		pros::delay(1000);
-
-
-		chassis.follow(Left4_txt, 15, 3000);
-		pros::delay(1000);
-		//chassis.turnToHeading(180, 1000);
-		pros::delay(1000);
-
-		//chassis.follow(Left5_txt, 15, 3000);
-
-		Intake.move_velocity(0);
-		Conveyor.move_velocity(0);
-		Intake.move_velocity(0);
-
-	} 
-	if(selector::auton == 2)//RED RIGHT
-	{
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		pros::delay(500);
-		chassis.setPose(-54.984, -35.014, 270);
-		chassis.follow(R1RED_txt, 15, 3000, false);
-		pros::delay(1000);
-
-
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		Intake.move_velocity(600);
-		Conveyor.move_velocity(-100);
-		
-
-
-		pros::delay(1000);
-		chassis.turnToHeading(180, 1000);
-		chassis.follow(R2RED_txt, 15, 3000);
-		pros::delay(500);
-
-		chassis.turnToHeading(0, 1000);
-		chassis.follow(R3RED_txt, 15, 3000);
-		Conveyor.move_velocity(0);
-		Intake.move_velocity(0);
-
-
-	} 
-	if(selector::auton == -1)//BLUE LEFT
-	{
-	}
-
-	if(selector::auton == -2)//BLUE RIGHT
-	{
-		pros::c::adi_digital_write(ExpansionClamp, HIGH);
-		pros::delay(500);
-		chassis.setPose(-54.984, -35.014, 270);
-		chassis.follow(R1BLUE_txt, 15, 3000, false);
-		pros::delay(1000);
-
-
-		pros::c::adi_digital_write(ExpansionClamp, LOW);
-		Intake.move_velocity(600);
-		Conveyor.move_velocity(-100);
-		
-
-
-		pros::delay(1000);
-		chassis.turnToHeading(180, 1000);
-		chassis.follow(R2BLUE_txt, 15, 3000);
-		pros::delay(500);
-
-		chassis.turnToHeading(0, 1000);
-		chassis.follow(R3BLUE_txt, 15, 3000);
-		Conveyor.move_velocity(0);
-		Intake.move_velocity(0);
-
-	}
-
-	if(selector::auton == 0)//Skills
-	{
-	} */
-	
+	pros::delay(1000);
 	Conveyor.move_velocity(0);
 	Intake.move_velocity(0);
 	driveR_train.move_voltage(0);
@@ -895,33 +934,9 @@ void opcontrol()
 	double Hue;
 	bool IntakeState;
 	bool IntakeREV;
-	bool ExpansionClampState;
-	bool ExpansionNeutral;
-	bool ExpansionIntakeState;
-	bool DoinkerState;
 	bool top_speed;
 
 	top_speed = false;
-	auto ExpansionClamp = 'A';
-	auto ExpansionIntake ='D';
-	auto NeutralStake ='C';
-	auto NeutralStake2 ='B';
-	auto Doinker ='E';
-
-	pros::c::adi_pin_mode(ExpansionIntake, OUTPUT);
-	pros::c::adi_digital_write(ExpansionIntake, LOW);
-
-	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
-	pros::c::adi_digital_write(ExpansionClamp, LOW);
-
-	pros::c::adi_pin_mode(NeutralStake, OUTPUT);
-	pros::c::adi_digital_write(NeutralStake, LOW);
-
-	pros::c::adi_pin_mode(NeutralStake2, OUTPUT);
-	pros::c::adi_digital_write(NeutralStake2, LOW);
-
-	pros::c::adi_pin_mode(Doinker, OUTPUT);
-	pros::c::adi_digital_write(Doinker, LOW);
 
 	while(true){
 		
@@ -1006,7 +1021,7 @@ void opcontrol()
 		//AUTO CLAMP
 		if(Distance_clamp.get() <= 20 and ExpansionClampState == false)
 		{
-			pros::c::adi_digital_write(ExpansionClamp, HIGH);
+			ExpansionClamp.set_value(HIGH);
 			ExpansionClampState = true;
 			printf("Distance to mogo=%d \n", Distance_clamp.get());
 		}
@@ -1016,12 +1031,13 @@ void opcontrol()
 		{
 			if(ExpansionClampState == true)
 			{
-				pros::c::adi_digital_write(ExpansionClamp, LOW);
+
+				ExpansionClamp.set_value(LOW);
 				ExpansionClampState = false;
 			}
 			else
 			{
-				pros::c::adi_digital_write(ExpansionClamp, HIGH);
+				ExpansionClamp.set_value(HIGH);
 				ExpansionClampState = true;
 			}
 			printf("Expansion state=%d \n", ExpansionClampState);
@@ -1033,15 +1049,15 @@ void opcontrol()
 		{
 			if(ExpansionNeutral == true)
 			{
-				pros::c::adi_digital_write(NeutralStake, LOW);
-				pros::c::adi_digital_write(NeutralStake2, LOW);
+				NuetralStake.set_value(LOW);
+				NuetralStake2.set_value(LOW);
 				ExpansionNeutral = false;
 				
 			}
 			else
 			{
-				pros::c::adi_digital_write(NeutralStake, HIGH);
-				pros::c::adi_digital_write(NeutralStake2, HIGH);
+				NuetralStake.set_value(HIGH);
+				NuetralStake2.set_value(HIGH);
 				ExpansionNeutral = true;
 			}
 			printf("Expansion state=%d \n", ExpansionNeutral);
@@ -1053,12 +1069,12 @@ void opcontrol()
 		{
 			if(ExpansionIntakeState == true)
 			{
-				pros::c::adi_digital_write(ExpansionIntake, LOW);
+				ExpansionIntake.set_value(LOW);
 				ExpansionIntakeState = false;
 			}
 			else
 			{
-				pros::c::adi_digital_write(ExpansionIntake, HIGH);
+				ExpansionIntake.set_value(HIGH);
 				ExpansionIntakeState = true;
 			}
 			printf("Expansion state=%d \n", ExpansionIntakeState);
@@ -1069,12 +1085,12 @@ void opcontrol()
 		{
 			if(DoinkerState == true)
 			{
-				pros::c::adi_digital_write(Doinker, LOW);
+				Doinker.set_value(LOW);
 				DoinkerState = false;
 			}
 			else
 			{
-				pros::c::adi_digital_write(Doinker, HIGH);
+				Doinker.set_value(HIGH);
 				DoinkerState = true;
 			}
 			printf("Expansion state=%d \n", ExpansionIntakeState);

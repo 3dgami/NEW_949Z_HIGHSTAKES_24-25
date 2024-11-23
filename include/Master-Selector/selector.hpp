@@ -26,6 +26,6 @@ void call_selected_auton();
  *
  * @param autons_per_row The number of autons that can be displayed on each row, defaults to 3
  */
-void initialize(int autons_per_row = 4);
+void initialize(int autons_per_row = 2);
 
 }  // namespace ms

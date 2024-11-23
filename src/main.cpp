@@ -657,6 +657,19 @@ ASSET(L4BLUEELIMS_txt);
 ASSET(L5BLUEELIMS_txt);
 
 //AUTON SKILLS
+ASSET(Skills1_txt);
+ASSET(Skills2_txt);
+ASSET(Skills3_txt);
+ASSET(Skills4_txt);
+ASSET(Skills5_txt);
+ASSET(Skills6_txt);
+ASSET(Skills7_txt);
+ASSET(Skills8_txt);
+ASSET(Skills9_txt);
+ASSET(Skills10_txt);
+
+
+
 
 
 //RIGHT SIDE AUTON//
@@ -667,7 +680,7 @@ void RED_Right_side_awp() {
 	pros::delay(500);
 	chassis.setPose(-54.984, -35.014, 270);
 	chassis.follow(R1RED_txt, 15, 3000, false);
-	pros::delay(1000);
+	pros::delay(2000);
 
 
 	ExpansionClamp.set_value(LOW);
@@ -694,7 +707,7 @@ void RED_Right_side_elims() {
 	pros::delay(500);
 	chassis.setPose(-54.984, -35.014, 270);
 	chassis.follow(R1RED_txt, 15, 3000, false);
-	pros::delay(1000);
+	pros::delay(2000);
 
 
 	ExpansionClamp.set_value(LOW);
@@ -910,7 +923,7 @@ void BLUE_LEFT_side_awp() {
 	pros::delay(500);
 	chassis.setPose(-54.984, -35.014, 270);
 	chassis.follow(L1BLUE_txt, 15, 3000, false);
-	pros::delay(1000);
+	pros::delay(2000);
 
 
 	ExpansionClamp.set_value(LOW);
@@ -937,7 +950,7 @@ void BLUE_LEFT_side_elims() {
 	pros::delay(500);
 	chassis.setPose(-54.984, -35.014, 270);
 	chassis.follow(L1BLUE_txt, 15, 3000, false);
-	pros::delay(1000);
+	pros::delay(2000);
 
 
 	ExpansionClamp.set_value(LOW);
@@ -968,7 +981,49 @@ void BLUE_LEFT_side_elims() {
 
 //SKILLS//
 void skills() {
-    // ...
+    ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+	chassis.setPose(-54.984, -35.014, 270);//change
+	chassis.follow(Skills1_txt, 15, 3000, false);
+	pros::delay(2000);
+
+
+	ExpansionClamp.set_value(LOW);
+	Intake.move_velocity(600);
+	Conveyor.move_velocity(-100);
+	chassis.turnToHeading(90, 1000);
+
+	chassis.follow(Skills2_txt, 15, 8000);
+
+	chassis.follow(Skills3_txt, 15, 3000, false);
+	chassis.turnToHeading(45, 1000);
+
+	chassis.follow(Skills4_txt, 15, 3000, false);
+	ExpansionClamp.set_value(HIGH);
+	pros::delay(500);
+
+	chassis.follow(Skills5_txt, 15, 5000);
+	chassis.turnToHeading(180, 1000);
+
+	chassis.follow(Skills6_txt, 15, 3000, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(LOW);
+	pros::delay(1000);
+	chassis.turnToHeading(90, 1000);
+
+	chassis.follow(Skills7_txt, 15, 8000);
+	chassis.turnToHeading(80, 1000);
+
+	chassis.follow(Skills8_txt, 15, 3000, false);
+	chassis.turnToHeading(135, 1000);
+
+	chassis.follow(Skills9_txt, 15, 3000, false);
+	pros::delay(500);
+	ExpansionClamp.set_value(HIGH);
+
+	chassis.follow(Skills10_txt, 15, 3000);
+
+	
 }
 
 
@@ -982,10 +1037,7 @@ void on_center_button() {}
  */
 void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
-	//pros::lcd::set_text_color(0,255,200);
-	//pros::lcd::set_background_color(84, 64, 64);
     chassis.calibrate(); // calibrate sensors
-	//chassis.setPose(-53.715, 40.64, 270);//FOR TESTING REMOVE WHEN DONE
 	ms::set_autons({  // Vector of categories
         ms::Category("Red", {
             ms::Auton("Right Side AWP", RED_Right_side_awp),
@@ -1004,7 +1056,6 @@ void initialize() {
         })
     });
     ms::initialize(); // Initialize the screen
-    pros::lcd::set_text_color(0,255,200);
 	/*
 	//Uncomment for testing COMMENT FOR TOURNEMENTS
     pros::Task screen_task([&]() {

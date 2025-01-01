@@ -29,7 +29,7 @@ pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
 pros::Motor LadyBrown(18);
 pros::Optical Color_sensor(19);
 pros::IMU imu(13);
-pros::Rotation LadyBrownRotate(8);
+pros::Rotation LadyBrownRotate(14);
 pros::Rotation RotationX(100, false);
 pros::Rotation RotationY(200, true);
 
@@ -597,6 +597,100 @@ void AbsGyroTurn(int angle)
 	return;
 }
 
+void LadyBrownArm(int position, int timeout)
+{
+
+	double kp = 1.0;
+	double ki = 1.0;
+	double kd = -2.5;   /*derivitive should control and stop overshooting this can be done
+						  by having kd be negative or having a (P + I - D) for the output PS 
+						*/
+	double P;
+	double I = 0;
+	double D;
+	int lastError = 0;
+	int errorTerm = 0;
+	int errorTotal = 0;
+	int sign;
+	int count = 0;
+	int SERT;
+	int SERT_count = 0;
+	bool SERT_bool = false;
+
+
+	/*if(LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() < 40000)
+		{
+			errorTerm = angle + (36000 - LadyBrownRotate.get_angle());
+		}
+	else if (LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() > 72000) 
+		{
+			errorTerm = -(angle + (36000 - LadyBrownRotate.get_angle()));
+		}	
+	else 
+		{
+			errorTerm = angle - LadyBrownRotate.get_position();
+		} */
+
+	errorTerm = position - LadyBrownRotate.get_position();
+
+	while (errorTerm > 10 or errorTerm < -10 and count < timeout) // and SERT_count < SERTx
+	{
+		if(count > timeout or SERT_count > SERT)
+		{
+			break;
+			printf("TIMEOUT \n");
+		}
+
+		/*if(LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() < 40000)
+		{
+			errorTerm = angle + (36000 - LadyBrownRotate.get_angle());
+		}
+		else if (LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() > 72000) 
+		{
+			errorTerm = (angle + (36000 - LadyBrownRotate.get_angle()));
+		}	
+		else 
+		{
+			errorTerm = angle - LadyBrownRotate.get_angle();
+		}*/
+
+		errorTerm = position - LadyBrownRotate.get_position();
+
+		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
+
+		int Pos = LadyBrownRotate.get_angle();
+
+		errorTotal = errorTotal + errorTerm;
+
+		sign = (errorTerm < 0) ? -1 : 1;
+
+
+		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
+
+		P = errorTerm * kp;
+		//I = errorTotal * ki;
+		D = (lastError - errorTerm) * kd;
+		double output = ((P + D) + (2000 * sign));
+
+		printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, Err=%d, rotationPOs=%d \n",output, P, D, Pos, errorTerm, LadyBrownRotate.get_position());
+
+		LadyBrown.move_voltage(-output);
+		
+		
+
+		lastError = errorTerm;
+		pros::delay(10);
+		
+		//SERT_bool = (errorTerm < 15) ? true : false;
+		//SERT_count = (SERT_bool = true) ? SERT_count + 20 : SERT_count;
+		count += 20;
+
+	}
+	LadyBrown.move_voltage(0);
+	printf("End\nErr=%d", errorTerm);
+
+	return;
+}
 
 //AUTON//
 
@@ -924,6 +1018,7 @@ void opcontrol()
 	bool IntakeState;
 	bool IntakeREV;
 	bool top_speed;
+	bool LadyBrownState;
 
 	top_speed = false;
 
@@ -1008,6 +1103,34 @@ void opcontrol()
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}*/
 
+		//LADYBROWN ARM
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+		{
+			LadyBrownArm(48500, 2000);
+			LadyBrownState = true;
+		}
+
+		//LADYBROWN HOLD
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			LadyBrownArm(56000, 2000); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN SCORE
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			LadyBrownArm(111000, 2000); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN STOW
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			LadyBrownArm(30000, 2000); 
+			LadyBrownState = false;
+		}
+
 
 		//MOGO CLAMP
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
@@ -1062,11 +1185,17 @@ void opcontrol()
 		//UNSTUCK CONVEYOR
 		if(Conveyor.get_actual_velocity() < 5 and top_speed == true)
 		{
-
-			Conveyor.move_velocity(-200);
-			pros::c::delay(300);
-			Conveyor.move_velocity(200);
-			top_speed = false;
+			if(LadyBrownState == true)
+			{
+				Conveyor.move_velocity(0);
+			}
+			else
+			{
+				Conveyor.move_velocity(-200);
+				pros::c::delay(300);
+				Conveyor.move_velocity(200);
+				top_speed = false;
+			}
 		}
 
 		//CHECK SPEED
@@ -1076,7 +1205,7 @@ void opcontrol()
 			printf("top_speed=%d \n", top_speed);
 		}
 		
-		printf("angle=%d", LadyBrownRotate.get_angle());
+		printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 
 		pros::delay(5);
 	};

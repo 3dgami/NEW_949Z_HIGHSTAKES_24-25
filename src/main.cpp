@@ -29,7 +29,7 @@ pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
 pros::Motor LadyBrown(18);
 pros::Optical Color_sensor(19);
 pros::IMU imu(13);
-pros::Rotation LadyBrownRotate(14);
+pros::Rotation LadyBrownRotate(8);
 pros::Rotation RotationX(100, false);
 pros::Rotation RotationY(200, true);
 

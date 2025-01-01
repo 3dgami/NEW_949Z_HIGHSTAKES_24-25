@@ -16,33 +16,31 @@
 //update all motor ports if needed
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(10, pros::E_MOTOR_GEAR_600);
-pros::Motor left_front(12, pros::E_MOTOR_GEAR_600);
-pros::Motor left_back(11, pros::E_MOTOR_GEAR_600);
-pros::Motor right_back(1, pros::E_MOTOR_GEAR_600);
-pros::Motor right_mid(33, pros::E_MOTOR_GEAR_600);
-pros::Motor left_mid(22, pros::E_MOTOR_GEAR_600);
-pros::Motor Conveyor(19);
-pros::Motor Intake(5);
-pros::Optical Color_sensor(5);
-pros::Distance Distance_sensor(3);
-pros::Distance Distance_clamp(4);
-pros::MotorGroup driveL_train({11, 12});//UPDATE WITH MOTOR WIRING CHANGING
-pros::MotorGroup driveR_train({10, 1});
-pros::MotorGroup full_drivetrain({11, 12, 10, 1});
-pros::IMU imu(3);
-pros::Rotation RotationX(4, false);
-pros::Rotation RotationY(9, true);
+pros::Motor left_front(-11, pros::E_MOTOR_GEAR_600);
+pros::Motor left_back(-4, pros::E_MOTOR_GEAR_600);
+pros::Motor right_back(9, pros::E_MOTOR_GEAR_600);
+pros::Motor right_mid(20, pros::E_MOTOR_GEAR_600);
+pros::Motor left_mid(-1, pros::E_MOTOR_GEAR_600);
+pros::Motor Conveyor(3);
+pros::Motor Intake(12);
+pros::MotorGroup driveL_train({-11, -1, -4});//UPDATE WITH MOTOR WIRING CHANGING
+pros::MotorGroup driveR_train({10, 20, 9});
+pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
+pros::Motor LadyBrown(18);
+pros::Optical Color_sensor(19);
+pros::IMU imu(13);
+pros::Rotation LadyBrownRotate(14);
+pros::Rotation RotationX(100, false);
+pros::Rotation RotationY(200, true);
 
 bool ExpansionClampState;
 bool ExpansionIntakeState;
 bool ExpansionNeutral;
 bool DoinkerState;
 
-pros::ADIDigitalOut ExpansionIntake('D');
-pros::ADIDigitalOut ExpansionClamp('A');
-pros::ADIDigitalOut NuetralStake('C');
-pros::ADIDigitalOut NuetralStake2('B');
-pros::ADIDigitalOut Doinker('E');
+pros::ADIDigitalOut ExpansionIntake('A');
+pros::ADIDigitalOut ExpansionClamp('B');
+pros::ADIDigitalOut Doinker('C');
 
 
 // horizontal tracking wheel
@@ -55,7 +53,7 @@ lemlib::TrackingWheel vertical_tracking_wheel(&RotationY, lemlib::Omniwheel::NEW
 pros::MotorGroup driveL_trainLem({-11, -12});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_trainLem({10, 1});
 
-// drivetrain settings
+// drivetrain settings //UPDATE
 lemlib::Drivetrain drivetrain(&driveL_trainLem, // left motor group
                               &driveR_trainLem, // right motor group
                               14, // 10 inch track width
@@ -971,8 +969,8 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(-100);
-				Intake.move_velocity(600);
+				Conveyor.move_velocity(200);
+				Intake.move_velocity(-200);
 				IntakeState = true;
 			}
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
@@ -989,13 +987,14 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(100);
-				Intake.move_velocity(-600);
+				Conveyor.move_velocity(-200);
+				Intake.move_velocity(200);
 				IntakeREV = true;
 			}
 			top_speed = false;
 			IntakeState = false;
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
+			pros::delay(100);
 		}
 
 
@@ -1009,13 +1008,6 @@ void opcontrol()
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}*/
 
-		//AUTO CLAMP
-		if(Distance_clamp.get() <= 20 and ExpansionClampState == false)
-		{
-			ExpansionClamp.set_value(HIGH);
-			ExpansionClampState = true;
-			printf("Distance to mogo=%d \n", Distance_clamp.get());
-		}
 
 		//MOGO CLAMP
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
@@ -1034,26 +1026,6 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionClampState);
 		}
 		
-
-		//NUETRAL STAKE EXPANSION
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			if(ExpansionNeutral == true)
-			{
-				NuetralStake.set_value(LOW);
-				NuetralStake2.set_value(LOW);
-				ExpansionNeutral = false;
-				
-			}
-			else
-			{
-				NuetralStake.set_value(HIGH);
-				NuetralStake2.set_value(HIGH);
-				ExpansionNeutral = true;
-			}
-			printf("Expansion state=%d \n", ExpansionNeutral);
-		}
-
 
 		//INTAKE EXPANSION
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
@@ -1087,22 +1059,24 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionIntakeState);
 		}
 
-		//CHECK SPEED
-		if(Conveyor.get_actual_velocity() > -5 and top_speed == true)
+		//UNSTUCK CONVEYOR
+		if(Conveyor.get_actual_velocity() < 5 and top_speed == true)
 		{
 
-			Conveyor.move_velocity(100);
+			Conveyor.move_velocity(-200);
 			pros::c::delay(300);
-			Conveyor.move_velocity(-100);
+			Conveyor.move_velocity(200);
 			top_speed = false;
 		}
 
-		//UNSTUCK CONVEYOR
-		if(Conveyor.get_actual_velocity() <= -40 and IntakeState == true)
+		//CHECK SPEED
+		if(Conveyor.get_actual_velocity() >= 180 and IntakeState == true)
 		{
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);
 		}
+		
+		printf("angle=%d", LadyBrownRotate.get_angle());
 
 		pros::delay(5);
 	};

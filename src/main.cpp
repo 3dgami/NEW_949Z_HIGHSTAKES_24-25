@@ -27,9 +27,9 @@ pros::MotorGroup driveL_train({-11, -1, -4});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({10, 20, 9});
 pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
 pros::Motor LadyBrown(18);
+pros::Rotation LadyBrownRotate(14);
 pros::Optical Color_sensor(19);
 pros::IMU imu(13);
-pros::Rotation LadyBrownRotate(14);
 pros::Rotation RotationX(100, false);
 pros::Rotation RotationY(200, true);
 
@@ -617,20 +617,6 @@ void LadyBrownArm(int position, int timeout)
 	int SERT_count = 0;
 	bool SERT_bool = false;
 
-
-	/*if(LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() < 40000)
-		{
-			errorTerm = angle + (36000 - LadyBrownRotate.get_angle());
-		}
-	else if (LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() > 72000) 
-		{
-			errorTerm = -(angle + (36000 - LadyBrownRotate.get_angle()));
-		}	
-	else 
-		{
-			errorTerm = angle - LadyBrownRotate.get_position();
-		} */
-
 	errorTerm = position - LadyBrownRotate.get_position();
 
 	while (errorTerm > 10 or errorTerm < -10 and count < timeout) // and SERT_count < SERTx
@@ -640,19 +626,6 @@ void LadyBrownArm(int position, int timeout)
 			break;
 			printf("TIMEOUT \n");
 		}
-
-		/*if(LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() < 40000)
-		{
-			errorTerm = angle + (36000 - LadyBrownRotate.get_angle());
-		}
-		else if (LadyBrownRotate.get_angle() > 24000 and LadyBrownRotate.get_position() > 72000) 
-		{
-			errorTerm = (angle + (36000 - LadyBrownRotate.get_angle()));
-		}	
-		else 
-		{
-			errorTerm = angle - LadyBrownRotate.get_angle();
-		}*/
 
 		errorTerm = position - LadyBrownRotate.get_position();
 
@@ -1021,6 +994,7 @@ void opcontrol()
 	bool LadyBrownState;
 
 	top_speed = false;
+	Color_sensor.set_led_pwm(10);
 
 	while(true){
 		
@@ -1048,9 +1022,6 @@ void opcontrol()
 
 		driveL_train.move(-left);
 		driveR_train.move(right);
-
-
-
 
 		//INTAKE CONTROL
 		if(master.get_digital_new_press(DIGITAL_A))
@@ -1093,13 +1064,15 @@ void opcontrol()
 		}
 
 
-		/*//COLOR SORT BLUE ALLIANCE
-		Hue = Color_sensor.get_hue(); 
-		if(Hue == 0 and IntakeState == true)
+		//COLOR SORT BLUE ALLIANCE
+		/*Hue = Color_sensor.get_hue(); 
+		if(Hue < 5.0 and IntakeState == true)
 		{
-			Conveyor.move_velocity(-300);
-			pros::c::delay(300);
-			Conveyor.move_velocity(-100);
+			pros::c::delay(175);
+			Conveyor.move_voltage(0);
+			Intake.move_velocity(0);
+			IntakeState = false;
+			top_speed = false;
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}*/
 
@@ -1127,7 +1100,7 @@ void opcontrol()
 		//LADYBROWN STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			LadyBrownArm(30000, 2000); 
+			LadyBrownArm(31000, 2000); 
 			LadyBrownState = false;
 		}
 
@@ -1205,8 +1178,9 @@ void opcontrol()
 			printf("top_speed=%d \n", top_speed);
 		}
 		
-		printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
+		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
+		//printf("hue=%f \n", Color_sensor.get_hue());
 
-		pros::delay(5);
+		pros::delay(1);
 	};
 }

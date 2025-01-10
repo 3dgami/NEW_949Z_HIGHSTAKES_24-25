@@ -37,6 +37,7 @@ bool ExpansionClampState;
 bool ExpansionIntakeState;
 bool ExpansionNeutral;
 bool DoinkerState;
+bool LadyBrownState;
 
 pros::ADIDigitalOut ExpansionIntake('A');
 pros::ADIDigitalOut ExpansionClamp('B');
@@ -665,6 +666,42 @@ void LadyBrownArm(int position, int timeout)
 	return;
 }
 
+void LadyBrownTask()
+{
+	while(true)
+	{
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+		{
+			LadyBrownArm(48500, 2000);
+			LadyBrownState = true;
+		}
+
+		//LADYBROWN HOLD
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			LadyBrownArm(56000, 2000); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN SCORE
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			LadyBrownArm(111000, 2000); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN STOW
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			LadyBrownArm(31000, 2000); 
+			LadyBrownState = false;
+		}
+		pros::delay(10);
+
+	}
+
+}
+
 //AUTON//
 
 //RIGHT SIDE AUTON RED AWP
@@ -887,24 +924,6 @@ void on_center_button() {}
 void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-	ms::set_autons({  // Vector of categories
-        ms::Category("Red", {
-            ms::Auton("Right Side AWP", RED_Right_side_awp),
-            ms::Auton("Right Side ELIMS", RED_Right_side_elims),
-			ms::Auton("Left Side AWP", RED_LEFT_side_awp),
-            ms::Auton("Left Side ELIMS", RED_LEFT_side_elims)
-        }),
-		ms::Category("Blue", {
-            ms::Auton("Right Side AWP", BLUE_Right_side_awp),
-            ms::Auton("Right Side ELIMS", BLUE_Right_side_elims),
-			ms::Auton("Left Side AWP", BLUE_LEFT_side_awp),
-            ms::Auton("Left Side ELIMS", BLUE_LEFT_side_elims)
-        }),
-        ms::Category("Skills", {
-            ms::Auton("Skills", skills)
-        })
-    });
-    ms::initialize(); // Initialize the screen
 	/*
 	//Uncomment for testing COMMENT FOR TOURNEMENTS
     pros::Task screen_task([&]() {
@@ -936,7 +955,28 @@ void disabled() {}
  * starts.
  */
 void competition_initialize()
-{}
+{
+	chassis.calibrate(); // calibrate sensors
+	ms::set_autons({  // Vector of categories
+        ms::Category("Red", {
+            ms::Auton("Right Side AWP", RED_Right_side_awp),
+            ms::Auton("Right Side ELIMS", RED_Right_side_elims),
+			ms::Auton("Left Side AWP", RED_LEFT_side_awp),
+            ms::Auton("Left Side ELIMS", RED_LEFT_side_elims)
+        }),
+		ms::Category("Blue", {
+            ms::Auton("Right Side AWP", BLUE_Right_side_awp),
+            ms::Auton("Right Side ELIMS", BLUE_Right_side_elims),
+			ms::Auton("Left Side AWP", BLUE_LEFT_side_awp),
+            ms::Auton("Left Side ELIMS", BLUE_LEFT_side_elims)
+        }),
+        ms::Category("Skills", {
+            ms::Auton("Skills", skills)
+        })
+    });
+    ms::initialize(); // Initialize the screen
+
+}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -991,10 +1031,11 @@ void opcontrol()
 	bool IntakeState;
 	bool IntakeREV;
 	bool top_speed;
-	bool LadyBrownState;
 
 	top_speed = false;
 	Color_sensor.set_led_pwm(10);
+
+	pros::Task my_task(LadyBrownTask);
 
 	while(true){
 		
@@ -1160,6 +1201,7 @@ void opcontrol()
 		{
 			if(LadyBrownState == true)
 			{
+				pros::delay(300);
 				Conveyor.move_velocity(0);
 			}
 			else
@@ -1181,6 +1223,6 @@ void opcontrol()
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		//printf("hue=%f \n", Color_sensor.get_hue());
 
-		pros::delay(1);
+		pros::delay(10);
 	};
 }

@@ -2,6 +2,7 @@
 //#include "autoSelect/selection.h"
 #include "Master-Selector/api.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
+#include "lemlib/chassis/trackingWheel.hpp"
 #include "pros/adi.h"
 #include "pros/adi.hpp"
 #include "pros/llemu.hpp"
@@ -58,8 +59,8 @@ pros::MotorGroup driveR_trainLem({10, 1});
 lemlib::Drivetrain drivetrain(&driveL_trainLem, // left motor group
                               &driveR_trainLem, // right motor group
                               14, // 10 inch track width
-                              lemlib::Omniwheel::NEW_325, // using new 3,25" omnis
-                              300, // drivetrain rpm is 360
+                              lemlib::Omniwheel::NEW_275, // using new 3,25" omnis
+                              450, // drivetrain rpm is 360
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 

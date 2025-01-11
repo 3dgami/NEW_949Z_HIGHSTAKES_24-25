@@ -5,12 +5,10 @@
 #include "lemlib/chassis/trackingWheel.hpp"
 #include "pros/adi.h"
 #include "pros/adi.hpp"
-#include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/rotation.hpp"
 #include "pros/rtos.hpp"
-#include <cstddef>
 
 
 
@@ -22,17 +20,17 @@ pros::Motor left_back(-4, pros::E_MOTOR_GEAR_600);
 pros::Motor right_back(9, pros::E_MOTOR_GEAR_600);
 pros::Motor right_mid(20, pros::E_MOTOR_GEAR_600);
 pros::Motor left_mid(-1, pros::E_MOTOR_GEAR_600);
-pros::Motor Conveyor(3);
-pros::Motor Intake(12);
 pros::MotorGroup driveL_train({-11, -1, -4});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({10, 20, 9});
 pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
+
+
+pros::Motor Conveyor(3);
+pros::Motor Intake(12);
 pros::Motor LadyBrown(18);
 pros::Rotation LadyBrownRotate(14);
 pros::Optical Color_sensor(19);
 pros::IMU imu(13);
-pros::Rotation RotationX(100, false);
-pros::Rotation RotationY(200, true);
 
 bool ExpansionClampState;
 bool ExpansionIntakeState;
@@ -45,19 +43,9 @@ pros::ADIDigitalOut ExpansionClamp('B');
 pros::ADIDigitalOut Doinker('C');
 
 
-// horizontal tracking wheel
-lemlib::TrackingWheel horizontal_tracking_wheel(&RotationX, lemlib::Omniwheel::NEW_2, 4.65);
-
-// vertical tracking wheel
-lemlib::TrackingWheel vertical_tracking_wheel(&RotationY, lemlib::Omniwheel::NEW_2, -2.5);
-
-
-pros::MotorGroup driveL_trainLem({-11, -12});//UPDATE WITH MOTOR WIRING CHANGING
-pros::MotorGroup driveR_trainLem({10, 1});
-
 // drivetrain settings //UPDATE
-lemlib::Drivetrain drivetrain(&driveL_trainLem, // left motor group
-                              &driveR_trainLem, // right motor group
+lemlib::Drivetrain drivetrain(&driveL_train, // left motor group
+                              &driveR_train, // right motor group
                               14, // 10 inch track width
                               lemlib::Omniwheel::NEW_275, // using new 3,25" omnis
                               450, // drivetrain rpm is 360
@@ -91,7 +79,7 @@ lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
 // sensors for odometry
 lemlib::OdomSensors sensors(nullptr, //&vertical_tracking_wheel, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
-                            &horizontal_tracking_wheel, // horizontal tracking wheel
+                            nullptr, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
                             &imu // inertial sensor
 );
@@ -927,7 +915,6 @@ void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 	/*
-	//Uncomment for testing COMMENT FOR TOURNEMENTS
     pros::Task screen_task([&]() {
         while (true) {
             // print robot location to the brain screen
@@ -1060,8 +1047,8 @@ void opcontrol()
 
 		int power = -(master.get_analog(ANALOG_RIGHT_X));
 		int turn = master.get_analog(ANALOG_LEFT_Y);
-		left = power - turn;
-		right = power + turn;
+		left = (((power - turn)^2) / 190.5); //used to just be power - turn
+		right = (((power + turn)^2) / 190.5); 
 
 		driveL_train.move(-left);
 		driveR_train.move(right);
@@ -1078,8 +1065,8 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(100);
-				Intake.move_velocity(-200);
+				Conveyor.move_velocity(200);
+				Intake.move_velocity(200);
 				IntakeState = true;
 			}
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
@@ -1096,14 +1083,13 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(-100);
-				Intake.move_velocity(200);
+				Conveyor.move_velocity(-200);
+				Intake.move_velocity(-200);
 				IntakeREV = true;
 			}
 			top_speed = false;
 			IntakeState = false;
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
-			pros::delay(100);
 		}
 
 
@@ -1203,12 +1189,8 @@ void opcontrol()
 		//UNSTUCK CONVEYOR
 		if(Conveyor.get_actual_velocity() < 5 and top_speed == true)
 		{
-			if(LadyBrownState == true)
-			{
-				//pros::delay(300);
-				//Conveyor.move_velocity(0);
-			}
-			else
+
+			if(LadyBrownState == false)
 			{
 				Conveyor.move_velocity(-200);
 				pros::c::delay(300);

@@ -603,7 +603,7 @@ void LadyBrownArm(int position, int timeout)
 
 	double kp = 1.0;
 	double ki = 1.0;
-	double kd = -2.5;   /*derivitive should control and stop overshooting this can be done
+	double kd = -2.0;   /*derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
 						*/
 	double P;
@@ -620,7 +620,7 @@ void LadyBrownArm(int position, int timeout)
 
 	errorTerm = position - LadyBrownRotate.get_position();
 
-	while (errorTerm > 10 or errorTerm < -10 and count < timeout) // and SERT_count < SERTx
+	while (errorTerm > 50 or errorTerm < -50 and count < timeout) // and SERT_count < SERTx
 	{
 		if(count > timeout or SERT_count > SERT)
 		{
@@ -644,7 +644,7 @@ void LadyBrownArm(int position, int timeout)
 		P = errorTerm * kp;
 		//I = errorTotal * ki;
 		D = (lastError - errorTerm) * kd;
-		double output = ((P + D) + (2000 * sign));
+		double output = ((P + D) + (500 * sign));
 
 		printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, Err=%d, rotationPOs=%d \n",output, P, D, Pos, errorTerm, LadyBrownRotate.get_position());
 
@@ -660,7 +660,8 @@ void LadyBrownArm(int position, int timeout)
 		count += 20;
 
 	}
-	LadyBrown.move_voltage(0);
+	//pros::delay(100);
+	LadyBrown.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	printf("End\nErr=%d", errorTerm);
 
 	return;
@@ -1035,7 +1036,7 @@ void opcontrol()
 	top_speed = false;
 	Color_sensor.set_led_pwm(10);
 
-	pros::Task my_task(LadyBrownTask);
+	//pros::Task my_task(LadyBrownTask);
 
 	while(true){
 		
@@ -1076,7 +1077,7 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(200);
+				Conveyor.move_velocity(100);
 				Intake.move_velocity(-200);
 				IntakeState = true;
 			}
@@ -1094,7 +1095,7 @@ void opcontrol()
 			}
 			else
 			{
-				Conveyor.move_velocity(-200);
+				Conveyor.move_velocity(-100);
 				Intake.move_velocity(200);
 				IntakeREV = true;
 			}
@@ -1107,11 +1108,13 @@ void opcontrol()
 
 		//COLOR SORT BLUE ALLIANCE
 		/*Hue = Color_sensor.get_hue(); 
-		if(Hue < 5.0 and IntakeState == true)
+		if(Hue < 15.0 and IntakeState == true)
 		{
-			pros::c::delay(175);
-			Conveyor.move_voltage(0);
-			Intake.move_velocity(0);
+			//pros::c::delay(175);
+			Conveyor.move_velocity(600);
+			pros::c::delay(500);
+			Conveyor.move_voltage(100);
+			//Intake.move_velocity(0);
 			IntakeState = false;
 			top_speed = false;
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
@@ -1120,34 +1123,34 @@ void opcontrol()
 		//LADYBROWN ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			LadyBrownArm(48500, 2000);
+			LadyBrownArm(44000, 1500);
 			LadyBrownState = true;
 		}
 
 		//LADYBROWN HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			LadyBrownArm(56000, 2000); 
+			LadyBrownArm(56000, 1500); 
 			LadyBrownState = false;
 		}
 
 		//LADYBROWN SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
-			LadyBrownArm(111000, 2000); 
+			LadyBrownArm(111000, 1500); 
 			LadyBrownState = false;
 		}
 
 		//LADYBROWN STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			LadyBrownArm(31000, 2000); 
+			LadyBrownArm(31000, 1500); 
 			LadyBrownState = false;
 		}
 
 
 		//MOGO CLAMP
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
 		{
 			if(ExpansionClampState == true)
 			{
@@ -1165,7 +1168,7 @@ void opcontrol()
 		
 
 		//INTAKE EXPANSION
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			if(ExpansionIntakeState == true)
 			{
@@ -1201,8 +1204,8 @@ void opcontrol()
 		{
 			if(LadyBrownState == true)
 			{
-				pros::delay(300);
-				Conveyor.move_velocity(0);
+				//pros::delay(300);
+				//Conveyor.move_velocity(0);
 			}
 			else
 			{
@@ -1221,7 +1224,7 @@ void opcontrol()
 		}
 		
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
-		//printf("hue=%f \n", Color_sensor.get_hue());
+		printf("hue=%f \n", Color_sensor.get_hue());
 
 		pros::delay(10);
 	};

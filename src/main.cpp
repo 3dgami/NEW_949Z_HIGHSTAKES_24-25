@@ -1014,6 +1014,7 @@ void autonomous()
 
 void opcontrol()
 {
+	//REMEBER STILL TESTING LADYBROWN TASKS
 	int left;
 	int right;
 	double Hue;
@@ -1024,7 +1025,7 @@ void opcontrol()
 	top_speed = false;
 	Color_sensor.set_led_pwm(10);
 
-	//pros::Task my_task(LadyBrownTask);
+	pros::Task my_task(LadyBrownTask);
 
 	while(true){
 		
@@ -1107,6 +1108,9 @@ void opcontrol()
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}*/
 
+
+		//LADY BRWON NOT USING TASKS
+		/*
 		//LADYBROWN ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
@@ -1134,6 +1138,7 @@ void opcontrol()
 			LadyBrownArm(31000, 1500); 
 			LadyBrownState = false;
 		}
+		*/
 
 
 		//MOGO CLAMP

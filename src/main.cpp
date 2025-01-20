@@ -8,39 +8,36 @@
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/rotation.hpp"
+#include "pros/rtos.h"
 #include "pros/rtos.hpp"
 
 
 
 //update all motor ports if needed
 pros::Controller master{CONTROLLER_MASTER};	
-pros::Motor right_front(10, pros::E_MOTOR_GEAR_600);
-pros::Motor left_front(-11, pros::E_MOTOR_GEAR_600);
-pros::Motor left_back(-4, pros::E_MOTOR_GEAR_600);
-pros::Motor right_back(9, pros::E_MOTOR_GEAR_600);
-pros::Motor right_mid(20, pros::E_MOTOR_GEAR_600);
-pros::Motor left_mid(-1, pros::E_MOTOR_GEAR_600);
-pros::MotorGroup driveL_train({-11, -1, -4});//UPDATE WITH MOTOR WIRING CHANGING
-pros::MotorGroup driveR_train({10, 20, 9});
-pros::MotorGroup full_drivetrain({-11, -1, -4, 10, 20, 9});
+pros::Motor right_front(11,pros::E_MOTOR_GEAR_600);
+pros::Motor left_front(-20, pros::E_MOTOR_GEAR_600);
+pros::Motor left_back(-12,pros::E_MOTOR_GEAR_600);
+pros::Motor right_back(19,pros::E_MOTOR_GEAR_600);
+pros::Motor right_mid(14,pros::E_MOTOR_GEAR_600);
+pros::Motor left_mid(-13,pros::E_MOTOR_GEAR_600);
+pros::MotorGroup driveL_train({left_front, left_mid, left_back});//UPDATE WITH MOTOR WIRING CHANGING
+pros::MotorGroup driveR_train({right_front, right_mid, right_back});
 
 
-pros::Motor Conveyor(3);
-pros::Motor Intake(12);
-pros::Motor LadyBrown(18);
-pros::Rotation LadyBrownRotate(14);
+pros::Motor Intake(18);
+pros::Motor LadyBrownLeft(9);
+pros::Motor LadyBrownRight(1);
+pros::Rotation LadyBrownRotate(3);
 pros::Optical Color_sensor(19);
-pros::IMU imu(13);
+pros::IMU imu(10);
 
 bool ExpansionClampState;
-bool ExpansionIntakeState;
-bool ExpansionNeutral;
 bool DoinkerState;
 bool LadyBrownState;
 
-pros::ADIDigitalOut ExpansionIntake('A');
-pros::ADIDigitalOut ExpansionClamp('B');
-pros::ADIDigitalOut Doinker('C');
+pros::ADIDigitalOut ExpansionClamp('A');
+pros::ADIDigitalOut Doinker('B');
 
 
 // drivetrain settings //UPDATE
@@ -103,42 +100,7 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
                         sensors // odometry sensors
 );
 
-void SetDriveRelative(int ticks, int Lspeed, int Rspeed)
-	{
-
-		left_front.move_relative(-(ticks), Lspeed);
-		left_back.move_relative(-(ticks), Lspeed);
-		left_mid.move_relative(-(ticks), Lspeed);
-		right_front.move_relative(ticks, Rspeed);
-		right_back.move_relative(ticks, Rspeed);
-		right_mid.move_relative(ticks, Rspeed);
-	}
-
-void SetDrive(int Lspeed, int Rspeed)
-	{
-		left_mid.move(-(Lspeed));
-		left_front.move(-(Lspeed));
-		left_back.move(-(Lspeed));
-		right_front.move(Rspeed);
-		right_back.move(Rspeed);
-		right_mid.move(Rspeed);
-	}
-
-double getLeftPos()
-{
-	return -(left_back.get_position() + left_front.get_position()) / 2;
-}
-
-double getRightPos()
-{
-	return (right_front.get_position() + right_back.get_position()) / 2;
-}
-
-double getPos()
-{
-	return (getLeftPos() + getRightPos()) / 2;
-}
-
+/*
 void driveTrain(int distance, int timeout)
 {
 
@@ -146,9 +108,9 @@ void driveTrain(int distance, int timeout)
 	int startPos = getPos();
 	double kp = 10.00;
 	double ki = 1.0;
-	double kd = -10.50;   /*derivitive should control and stop overshooting this can be done
+	double kd = -10.50;   derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
-						*/
+						
 	double P;
 	double I = 0;
 	double D;
@@ -224,9 +186,9 @@ void turn(int angle)
 	int startPos = getPos();
 	double kp = 11.0;
 	double ki = 0.1;
-	double kd = -5.50; /*derivitive should control and stop overshooting this can be done
+	double kd = -5.50; derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output
-						*/
+						
 	double P;
 	double I;
 	double D;
@@ -298,9 +260,9 @@ void Centralturn(int angle, bool side)
 
 	double kp = 2.0;
 	double ki = 0.1;
-	double kd = -5.50; /*derivitive should control and stop overshooting this can be done
+	double kd = -5.50; derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output
-						*/
+						
 	double P;
 	double I;
 	double D;
@@ -385,9 +347,9 @@ void gyroTurn(int angle)
 
 	double kp = 20.0;
 	double ki = 0.1;
-	double kd = -19; /*derivitive should control and stop overshooting this can be done
+	double kd = -19; derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output
-						*/
+						
 	double P;
 	double I;
 	double D;
@@ -412,11 +374,7 @@ void gyroTurn(int angle)
 		errorTerm = -diff;
 		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
 	}
-	/*else
-	{
-		errorTerm = -diff;
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-	}*/
+	
 	//errorTerm = diff;
 	errorTerm = fabs(errorTerm);
 
@@ -445,11 +403,7 @@ void gyroTurn(int angle)
 			errorTerm = -diff;
 			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
 		}
-		/*else
-		{
-			errorTerm = -diff;
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-		}*/
+		
 		//errorTerm = diff;
 		errorTerm = fabs(errorTerm);
 
@@ -495,9 +449,7 @@ void AbsGyroTurn(int angle)
 
 	double kp = 40.0;
 	double ki = 0.1;
-	double kd = -20.50; /*derivitive should control and stop overshooting this can be done
-						  by having kd be negative or having a (P + I - D) for the output
-						*/
+	double kd = -20.50; 
 	double P;
 	double I;
 	double D;
@@ -586,13 +538,14 @@ void AbsGyroTurn(int angle)
 
 	return;
 }
+*/
 
 void LadyBrownArm(int position, int timeout)
-{
+{	
 
-	double kp = 1.0;
+	double kp = 0.5;
 	double ki = 1.0;
-	double kd = -2.0;   /*derivitive should control and stop overshooting this can be done
+	double kd = -1.0;   /*derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
 						*/
 	double P;
@@ -608,6 +561,7 @@ void LadyBrownArm(int position, int timeout)
 	bool SERT_bool = false;
 
 	errorTerm = position - LadyBrownRotate.get_position();
+
 
 	while (errorTerm > 50 or errorTerm < -50 and count < timeout) // and SERT_count < SERTx
 	{
@@ -633,11 +587,12 @@ void LadyBrownArm(int position, int timeout)
 		P = errorTerm * kp;
 		//I = errorTotal * ki;
 		D = (lastError - errorTerm) * kd;
-		double output = ((P + D) + (500 * sign));
+		double output = ((P + D) + (1 * sign));
 
 		printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, Err=%d, rotationPOs=%d \n",output, P, D, Pos, errorTerm, LadyBrownRotate.get_position());
 
-		LadyBrown.move_voltage(-output);
+		LadyBrownRight.move_voltage(-output);
+		LadyBrownLeft.move_voltage(output);
 		
 		
 
@@ -650,46 +605,9 @@ void LadyBrownArm(int position, int timeout)
 
 	}
 	//pros::delay(100);
-	LadyBrown.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	printf("End\nErr=%d", errorTerm);
 
 	return;
-}
-
-void LadyBrownTask()
-{
-	while(true)
-	{
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			LadyBrownArm(48500, 2000);
-			LadyBrownState = true;
-		}
-
-		//LADYBROWN HOLD
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			LadyBrownArm(56000, 2000); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN SCORE
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			LadyBrownArm(111000, 2000); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN STOW
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			LadyBrownArm(31000, 2000); 
-			LadyBrownState = false;
-		}
-		pros::delay(10);
-
-	}
-
 }
 
 //AUTON//
@@ -758,7 +676,7 @@ void RED_Right_side_awp() {
 
 	ExpansionClamp.set_value(LOW);
 	Intake.move_velocity(600);
-	Conveyor.move_velocity(-100);
+	Intake.move_velocity(100);
 		
 
 
@@ -789,7 +707,7 @@ void BLUE_Right_side_awp() {
 	ExpansionClamp.set_value(LOW);
 	pros::delay(500);
 	chassis.turnToHeading(0, 1000);
-	Conveyor.move_velocity(-100);
+	Intake.move_velocity(100);
 	Intake.move_velocity(600);
 
 	chassis.follow(R2BLUE_txt, 15, 1500);
@@ -835,7 +753,7 @@ void RED_LEFT_side_awp() {
 	ExpansionClamp.set_value(LOW);
 	pros::delay(500);
 	chassis.turnToHeading(0, 1000);
-	Conveyor.move_velocity(-100);
+	Intake.move_velocity(100);
 	Intake.move_velocity(600);
 
 	chassis.follow(L2RED_txt, 15, 1500);
@@ -877,7 +795,7 @@ void BLUE_LEFT_side_awp() {
 
 	ExpansionClamp.set_value(LOW);
 	Intake.move_velocity(600);
-	Conveyor.move_velocity(-100);
+	Intake.move_velocity(100);
 		
 
 
@@ -905,6 +823,8 @@ void skills() {
 
 void on_center_button() {}
 
+
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -914,6 +834,40 @@ void on_center_button() {}
 void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
+	 pros::Task LadyBrownTask{[=] {
+            while(true)
+		{
+		//LADYBROWN ARM
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+		{
+			LadyBrownArm(-1609 , 1500); 
+			LadyBrownState = true;
+
+		}
+
+		//LADYBROWN HOLD
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			LadyBrownArm(-12000, 1500); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN SCORE
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			LadyBrownArm(-53000,1500); 
+			LadyBrownState = false;
+		}
+
+		//LADYBROWN STOW
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			LadyBrownArm(15000, 1500); 
+			LadyBrownState = false;
+		}
+		pros::delay(10);
+		}
+    }};
 	/*
     pros::Task screen_task([&]() {
         while (true) {
@@ -990,7 +944,6 @@ void autonomous()
 	ms::call_selected_auton();
 
 	pros::delay(1000);
-	Conveyor.move_velocity(0);
 	Intake.move_velocity(0);
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
@@ -1012,9 +965,10 @@ void autonomous()
  * task, not resume it from where it left off.
  */
 
+
 void opcontrol()
 {
-	//REMEBER STILL TESTING LADYBROWN TASKS
+	
 	int left;
 	int right;
 	double Hue;
@@ -1024,8 +978,6 @@ void opcontrol()
 
 	top_speed = false;
 	Color_sensor.set_led_pwm(10);
-
-	pros::Task my_task(LadyBrownTask);
 
 	while(true){
 		
@@ -1048,8 +1000,8 @@ void opcontrol()
 
 		int power = -(master.get_analog(ANALOG_RIGHT_X));
 		int turn = master.get_analog(ANALOG_LEFT_Y);
-		left = (((power - turn)^2) / 190.5); //used to just be power - turn
-		right = (((power + turn)^2) / 190.5); 
+		left = power - turn; //(((power - turn)^2) / 190.5); //used to just be power - turn
+		right = power + turn; //(((power + turn)^2) / 190.5); 
 
 		driveL_train.move(-left);
 		driveR_train.move(right);
@@ -1059,14 +1011,12 @@ void opcontrol()
 		{
 			if(IntakeState == true)
 			{
-				Conveyor.move_velocity(0);
 				Intake.move_velocity(0);
 				top_speed = false;
 				IntakeState = false;
 			}
 			else
 			{
-				Conveyor.move_velocity(200);
 				Intake.move_velocity(200);
 				IntakeState = true;
 			}
@@ -1078,13 +1028,11 @@ void opcontrol()
 		{
 			if(IntakeREV == true)
 			{
-				Conveyor.move_velocity(0);
 				Intake.move_velocity(0);
 				IntakeREV = false;
 			}
 			else
 			{
-				Conveyor.move_velocity(-200);
 				Intake.move_velocity(-200);
 				IntakeREV = true;
 			}
@@ -1109,36 +1057,36 @@ void opcontrol()
 		}*/
 
 
-		//LADY BRWON NOT USING TASKS
-		/*
+		/*//LADY BRWON NOT USING TASKS
+		
 		//LADYBROWN ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			LadyBrownArm(44000, 1500);
+			LadyBrownArm(-1609 , 1500); //-1609
 			LadyBrownState = true;
+
 		}
 
 		//LADYBROWN HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			LadyBrownArm(56000, 1500); 
+			LadyBrownArm(-12000, 1500); 
 			LadyBrownState = false;
 		}
 
 		//LADYBROWN SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
-			LadyBrownArm(111000, 1500); 
+			LadyBrownArm(-53000,1500); 
 			LadyBrownState = false;
 		}
 
 		//LADYBROWN STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			LadyBrownArm(31000, 1500); 
+			LadyBrownArm(15000, 1500); 
 			LadyBrownState = false;
-		}
-		*/
+		}*/
 
 
 		//MOGO CLAMP
@@ -1158,23 +1106,6 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionClampState);
 		}
 		
-
-		//INTAKE EXPANSION
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
-		{
-			if(ExpansionIntakeState == true)
-			{
-				ExpansionIntake.set_value(LOW);
-				ExpansionIntakeState = false;
-			}
-			else
-			{
-				ExpansionIntake.set_value(HIGH);
-				ExpansionIntakeState = true;
-			}
-			printf("Expansion state=%d \n", ExpansionIntakeState);
-		}
-
 		//DOINKER
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
 		{
@@ -1188,31 +1119,31 @@ void opcontrol()
 				Doinker.set_value(HIGH);
 				DoinkerState = true;
 			}
-			printf("Expansion state=%d \n", ExpansionIntakeState);
+			printf("Expansion state=%d \n", DoinkerState);
 		}
 
 		//UNSTUCK CONVEYOR
-		if(Conveyor.get_actual_velocity() < 5 and top_speed == true)
+		if(Intake.get_actual_velocity() < 5 and top_speed == true)
 		{
 
 			if(LadyBrownState == false)
 			{
-				Conveyor.move_velocity(-200);
+				Intake.move_velocity(-200);
 				pros::c::delay(300);
-				Conveyor.move_velocity(200);
+				Intake.move_velocity(200);
 				top_speed = false;
 			}
 		}
 
 		//CHECK SPEED
-		if(Conveyor.get_actual_velocity() >= 180 and IntakeState == true)
+		if(Intake.get_actual_velocity() >= 180 and IntakeState == true)
 		{
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);
 		}
 		
-		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
-		printf("hue=%f \n", Color_sensor.get_hue());
+		printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
+		//printf("hue=%f \n", Color_sensor.get_hue());
 
 		pros::delay(10);
 	};

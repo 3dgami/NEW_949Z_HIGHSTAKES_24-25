@@ -44,9 +44,9 @@ pros::ADIDigitalOut Doinker('B');
 // drivetrain settings //UPDATE
 lemlib::Drivetrain drivetrain(&driveL_train, // left motor group
                               &driveR_train, // right motor group
-                              13, // 10 inch track width
-                              lemlib::Omniwheel::NEW_275, // using new 3,25" omnis
-                              450, // drivetrain rpm is 360
+                              13, // 13 inch track width
+                              lemlib::Omniwheel::NEW_275, // using new 2,75" omnis
+                              450, // drivetrain rpm is 450
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
 );
 
@@ -668,6 +668,8 @@ ASSET(L3BLUE_txt);
 
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
+	chassis.setPose(-49.4, -57.423, 270);
+	chassis.follow(R1RED_txt, 15, 2000, false);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -690,16 +692,23 @@ void BLUE_Right_side_elims() {
 void RED_LEFT_side_awp() {
 	chassis.setPose(-49.4, 23.3, 270);
 	chassis.follow(L1RED_txt, 15, 2000, false);
-	pros::delay(1000);
+	pros::delay(750);
 	ExpansionClamp.set_value(true);
-	pros::delay(1000);
+	pros::delay(750);
 	Intake.move_velocity(200);
+	pros::delay(750);
 	chassis.turnToHeading(15,1000);
 	chassis.follow(L2RED_txt, 15, 2000, true);
-	pros::delay(500);
-	chassis.turnToHeading(80,1000);
-	chassis.follow(L3RED_txt, 15, 2000, true);
-	pros::delay(1000);
+	pros::delay(750);
+	chassis.follow(L3RED_txt, 15, 2000, false);
+	chassis.turnToHeading(90,1000);
+	pros::delay(750);
+	chassis.follow(L4RED_txt, 15, 2000, true);
+	pros::delay(750);
+	Intake.move_velocity(0);
+	chassis.follow(L4RED_txt, 15, 2000, false);
+	chassis.turnToHeading(170,1000);
+	chassis.follow(L5RED_txt, 15, 2000, true);
 
 }
 

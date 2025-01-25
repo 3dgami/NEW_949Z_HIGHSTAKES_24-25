@@ -51,7 +51,7 @@ lemlib::Drivetrain drivetrain(&driveL_train, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings lateral_controller(15, // proportional gain (kP)
+lemlib::ControllerSettings lateral_controller(18, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             3, // derivative gain (kD)
                                             3, // anti windup
@@ -668,8 +668,14 @@ ASSET(L3BLUE_txt);
 
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
-	chassis.setPose(-49.4, -57.423, 270);
-	chassis.follow(R1RED_txt, 15, 2000, false);
+	chassis.setPose(-52.311, -58.847, 270);
+	chassis.follow(R1RED_txt, 15, 2500, false);
+	pros::delay(1500);
+	ExpansionClamp.set_value(true);
+	pros::delay(1500);
+	Intake.move_velocity(200);
+	chassis.follow(R2RED_txt, 15, 10000);
+	pros::delay(1000);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -690,25 +696,23 @@ void BLUE_Right_side_elims() {
 // RED Alliance Left Side and gets the auton win point
 //still testing not final
 void RED_LEFT_side_awp() {
-	chassis.setPose(-49.4, 23.3, 270);
+	chassis.setPose(-51.863, 23.217, 270);
 	chassis.follow(L1RED_txt, 15, 2000, false);
 	pros::delay(750);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	Intake.move_velocity(200);
 	pros::delay(750);
-	chassis.turnToHeading(15,1000);
-	chassis.follow(L2RED_txt, 15, 2000, true);
+	chassis.turnToHeading(0, 1500);
+	chassis.follow(L2RED_txt, 15, 2000);
 	pros::delay(750);
-	chassis.follow(L3RED_txt, 15, 2000, false);
-	chassis.turnToHeading(90,1000);
-	pros::delay(750);
-	chassis.follow(L4RED_txt, 15, 2000, true);
-	pros::delay(750);
-	Intake.move_velocity(0);
+	chassis.turnToHeading(300, 1500);
+	chassis.turnToHeading(85, 1500);
+	chassis.follow(L3RED_txt, 15, 2000);
 	chassis.follow(L4RED_txt, 15, 2000, false);
-	chassis.turnToHeading(170,1000);
-	chassis.follow(L5RED_txt, 15, 2000, true);
+	chassis.turnToHeading(180, 1500);
+	chassis.follow(L5RED_txt, 15, 2000);
+
 
 }
 
@@ -925,7 +929,7 @@ void opcontrol()
 			}
 			else
 			{
-				Intake.move_velocity(200);
+				Intake.move_velocity(300);
 				IntakeState = true;
 			}
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
@@ -941,7 +945,7 @@ void opcontrol()
 			}
 			else
 			{
-				Intake.move_velocity(-200);
+				Intake.move_velocity(-300);
 				IntakeREV = true;
 			}
 			top_speed = false;

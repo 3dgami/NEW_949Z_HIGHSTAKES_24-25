@@ -13,8 +13,6 @@
 #include "pros/rtos.hpp"
 
 
-
-//update all motor ports if needed
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(11,pros::E_MOTOR_GEAR_600);
 pros::Motor left_front(-20, pros::E_MOTOR_GEAR_600);
@@ -24,7 +22,6 @@ pros::Motor right_mid(14,pros::E_MOTOR_GEAR_600);
 pros::Motor left_mid(-13,pros::E_MOTOR_GEAR_600);
 pros::MotorGroup driveL_train({left_front, left_mid, left_back});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({right_front, right_mid, right_back});
-
 
 pros::Motor Intake(18);
 pros::Motor LadyBrownLeft(9);
@@ -100,446 +97,6 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
                         angular_controller, // angular PID settings
                         sensors // odometry sensors
 );
-
-/*
-void driveTrain(int distance, int timeout)
-{
-
-	driveL_train.set_reversed(true);
-	int startPos = getPos();
-	double kp = 10.00;
-	double ki = 1.0;
-	double kd = -10.50;   derivitive should control and stop overshooting this can be done
-						  by having kd be negative or having a (P + I - D) for the output PS 
-						
-	double P;
-	double I = 0;
-	double D;
-	int lastError = 0;
-	int errorTerm = 0;
-	int errorTotal = 0;
-	int sign;
-	int count = 0;
-	int SERT;
-	int SERT_count = 0;
-	bool SERT_bool = false;
-
-	sign = (distance < 0) ? -1 : 1;
-	
-	errorTerm = distance + startPos - getPos();
-
-	while (errorTerm > 1 or errorTerm < -1 and count < timeout) // and SERT_count < SERTx
-	{
-		if(count > timeout or SERT_count > SERT)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
-
-		errorTerm = distance + startPos - getPos();
-
-		int Pos = getPos();
-
-		errorTotal = errorTotal + errorTerm;
-
-		sign = (errorTerm < 0) ? -1 : 1;
-
-
-		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
-
-		P = errorTerm * kp;
-		//I = errorTotal * ki;
-		D = (lastError - errorTerm) * kd;
-		double output = (((P + I + D) + (1000 * sign)));
-
-		printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, startPos=%d Err=%d\n",output, P, D, Pos, startPos, errorTerm);
-
-		driveL_train.move_voltage(output);
-		driveR_train.move_voltage(output);
-		//full_drivetrain.move_voltage(output);
-		
-
-		lastError = errorTerm;
-		pros::delay(20);
-		
-		//SERT_bool = (errorTerm < 15) ? true : false;
-		//SERT_count = (SERT_bool = true) ? SERT_count + 20 : SERT_count;
-		count += 20;
-
-	}
-	driveL_train.move_voltage(0);
-	driveR_train.move_voltage(0);
-	printf("End\nErr=%d", errorTerm);
-	driveL_train.set_reversed(false);
-
-	return;
-}
-
-void turn(int angle)
-{
-	driveL_train.set_reversed(false);
-	double CircleTicks = 2750;
-	int turnTicks = (CircleTicks/360) * angle;
-	int count = 0;
-
-
-
-	int startPos = getPos();
-	double kp = 11.0;
-	double ki = 0.1;
-	double kd = -5.50; derivitive should control and stop overshooting this can be done
-						  by having kd be negative or having a (P + I - D) for the output
-						
-	double P;
-	double I;
-	double D;
-	int lastError = 0;
-	int errorTerm;
-	int errorTotal = 0;
-	int sign = 1;
-
-	sign = (angle > 0) ? 1 : -1;
-
-	errorTerm = (turnTicks + startPos) - floor(getPos());
-
-
-	printf("start\n");
-	while (errorTerm > 1 or errorTerm < -1 and count <= 2000)
-	{
-
-		if(count > 2000)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
-
-		errorTerm = (turnTicks + startPos) - floor(getPos());
-
-		sign = (errorTerm < 0) ? -1 : 1;
-
-		int pos = getPos();
-
-		errorTotal = errorTotal + errorTerm;
-
-		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
-
-
-		P = errorTerm * kp;
-		I = errorTotal * ki;
-		D = (lastError - errorTerm) * kd;
-		int output = (((P + D)) + (1500 * sign));
-
-
-		printf("step err=%d, P=%.02f, D=%.02f, StartPos=%d, Pos=%d, O=%d turn=%d count=%d \n", errorTerm, P, D, startPos, pos, output, turnTicks, count);
-
-
-		driveL_train.move_voltage(output);
-		driveR_train.move_voltage(output);
-
-		lastError = errorTerm;
-		pros::delay(10);
-		count += 10;
-	}
-	driveL_train.move_voltage(0);
-	driveR_train.move_voltage(0);
-	driveL_train.set_reversed(true);
-
-	pros::delay(10);
-	printf("\nDone err=%d\n, O=%d", errorTerm, turnTicks);
-
-	return;
-}
-
-void Centralturn(int angle, bool side)
-{	
-	driveL_train.set_reversed(true);
-	double CircleTicks = 5400;
-	int turnTicks = (CircleTicks/360) * angle;
-	int count = 0;
-	int startPos;
-	double Pos;
-
-	double kp = 2.0;
-	double ki = 0.1;
-	double kd = -5.50; derivitive should control and stop overshooting this can be done
-						  by having kd be negative or having a (P + I - D) for the output
-						
-	double P;
-	double I;
-	double D;
-	int lastError = 0;
-	int errorTerm;
-	int errorTotal = 0;
-	int sign = 1;
-
-	sign = (angle > 0) ? 1 : -1;
-
-
-	if(side == 1)
-	{
-		startPos = getRightPos();
-	}
-	
-	else if(side == 0)
-	{
-		startPos = getLeftPos();
-	}
-	Pos = (side == 1) ? getRightPos() : getLeftPos();
-
-	errorTerm = (turnTicks + startPos) - Pos;
-
-	while(errorTerm > 1 or errorTerm < 1 and count <= 3000)
-	{
-		if(count > 3000)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
-
-		Pos = (side == 1) ? getRightPos() : getLeftPos();
-		errorTerm = (turnTicks + startPos) - floor(Pos);
-
-		sign = (errorTerm < 0) ? -1 : 1;
-
-		int pos = getPos();
-
-		errorTotal = errorTotal + errorTerm;
-
-		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
-
-
-		P = errorTerm * kp;
-		I = errorTotal * ki;
-		D = (lastError - errorTerm) * kd;
-		int output = (((P + D)) + (1250 * sign));
-
-
-		printf("step err=%d, P=%.02f, D=%.02f, StartPos=%d, Pos=%d, O=%d turn=%d count=%d \n", errorTerm, P, D, startPos, pos, output, turnTicks, count);
-
-		if(side == 1)
-		{
-			driveR_train.move_voltage(output);
-		}
-		else if(side == 0)
-		{
-			driveL_train.move_voltage(output);
-		}
-		
-		lastError = errorTerm;
-		pros::delay(10);
-		count += 10;
-	}
-	driveL_train.move_voltage(0);
-	driveR_train.move_voltage(0);
-
-	pros::delay(10);
-	printf("\nDone err=%d\n, O=%d", errorTerm, turnTicks);
-
-	return;
-}
-
-void gyroTurn(int angle)
-{
-	printf("start \n");
-	//driveL_train.set_reversed(true);
-	//driveR_train.set_reversed(true);
-
-	double heading = imu.get_heading();
-
-	double kp = 20.0;
-	double ki = 0.1;
-	double kd = -19; derivitive should control and stop overshooting this can be done
-						  by having kd be negative or having a (P + I - D) for the output
-						
-	double P;
-	double I;
-	double D;
-	int lastError = 0;
-	double errorTerm;
-	int errorTotal = 0;
-	int sign = 1; 
-	int count = 0;
-	double ActualAngle;
-
-	ActualAngle = (heading + angle) > 360 ? heading + angle - 360 : heading + angle;
-	double diff = fabs(heading - ActualAngle);
-	if(diff <= 180)
-	{
-		//errorTerm = -(360 + diff);
-		errorTerm = diff;
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-
-	}
-	else if(diff > 180)
-	{
-		errorTerm = -diff;
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-	}
-	
-	//errorTerm = diff;
-	errorTerm = fabs(errorTerm);
-
-
-	printf("start\n");
-	while (errorTerm > 0.5 or errorTerm < -0.5 and count <= 6000) 
-	{
-
-		if(count > 6000)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
-
-		heading = imu.get_heading();
-		diff = heading - angle;
-		if(diff <= 180)
-		{
-		//errorTerm = -(360 + diff);
-			errorTerm = diff;
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-
-		}
-		else if(diff > 180)
-		{
-			errorTerm = -diff;
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-		}
-		
-		//errorTerm = diff;
-		errorTerm = fabs(errorTerm);
-
-		errorTotal = errorTotal + errorTerm;
-
-		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
-
-
-		P = errorTerm * kp;
-		I = errorTotal * ki;
-		D = (lastError - errorTerm) * kd;
-		int output = (((P + D) + 1500) * sign);
-
-
-		printf("err=%0.2f, P=%.02f, D=%.02f, O=%d, heading=%0.2f count=%d \n", errorTerm, P, D, output, heading, count);
-
-
-		driveL_train.move_voltage(output);
-		driveR_train.move_voltage(output);
-
-		lastError = errorTerm;
-		pros::delay(10);
-		count += 10;
-	}
-	driveL_train.move_voltage(0);
-	driveR_train.move_voltage(0);
-	driveL_train.set_reversed(true);
-	driveR_train.set_reversed(false);
-
-	pros::delay(100);
-	printf("Heading=%0.2f \n", imu.get_heading());
-
-	return;
-}
-
-void AbsGyroTurn(int angle)
-{
-	printf("start \n");
-	driveL_train.set_reversed(true);
-	driveR_train.set_reversed(true);
-
-	double heading = imu.get_heading();
-
-	double kp = 40.0;
-	double ki = 0.1;
-	double kd = -20.50; 
-	double P;
-	double I;
-	double D;
-	int lastError = 0;
-	double errorTerm;
-	int errorTotal = 0;
-	int sign = 1; 
-	int count = 0;
-
-	double diff = heading - angle;
-	if(diff < -180)
-	{
-		errorTerm = -(360 + diff);
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-	}
-	else if(diff > 180)
-	{
-		errorTerm = 360 - diff;
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-	}
-	else
-	{
-		errorTerm = -diff;
-		sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-	}
-	errorTerm = fabs(errorTerm);
-
-
-	printf("start\n");
-	while (errorTerm > 0.5 or errorTerm < -0.5 and count <= 2000) 
-	{
-
-		if(count > 2000)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
-
-		heading = imu.get_heading();
-		diff = heading - angle;
-		if(diff < -180)
-		{
-			errorTerm = -(360 + diff);
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-		}
-		else if(diff > 180)
-		{
-			errorTerm = 360 - diff;
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-		}
-		else
-		{
-			errorTerm = -diff;
-			sign = (errorTerm < 0) ? sign = -1 : sign = 1;
-		}
-		errorTerm = fabs(errorTerm);
-
-		errorTotal = errorTotal + errorTerm;
-
-		errorTotal = (errorTotal > 500 / ki) ? 500 / ki : errorTotal;
-
-
-		P = errorTerm * kp;
-		I = errorTotal * ki;
-		D = (lastError - errorTerm) * kd;
-		int output = (((P + D) + 1500) * sign);
-
-
-		printf("err=%0.2f, P=%.02f, D=%.02f, O=%d, heading=%0.2f count=%d \n", errorTerm, P, D, output, heading, count);
-
-
-		driveL_train.move_voltage(output);
-		driveR_train.move_voltage(output);
-
-		lastError = errorTerm;
-		pros::delay(10);
-		count += 10;
-	}
-	driveL_train.move_voltage(0);
-	driveR_train.move_voltage(0);
-	driveL_train.set_reversed(true);
-	driveR_train.set_reversed(false);
-
-	pros::delay(100);
-	printf("Heading=%0.2f \n", imu.get_heading());
-
-	return;
-}
-*/
 
 void LadyBrownArm(int position, int timeout)
 {	
@@ -617,6 +174,13 @@ void LadyBrownArm(int position, int timeout)
 ASSET(R1RED_txt);
 ASSET(R2RED_txt);
 ASSET(R3RED_txt);
+ASSET(R4RED_txt);
+ASSET(R5RED_txt);
+ASSET(R6RED_txt);
+ASSET(R7RED_txt);
+ASSET(R8RED_txt);
+ASSET(R9RED_txt);
+ASSET(R10RED_txt);
 
 //RIGHT SIDE AUTON RED ELIMS
 
@@ -654,11 +218,19 @@ ASSET(L10RED_txt);
 ASSET(L1BLUE_txt);
 ASSET(L2BLUE_txt);
 ASSET(L3BLUE_txt);
+ASSET(L4BLUE_txt);
+ASSET(L5BLUE_txt);
+ASSET(L6BLUE_txt);
+ASSET(L7BLUE_txt);
+ASSET(L8BLUE_txt);
+ASSET(L9BLUE_txt);
+ASSET(L10BLUE_txt);
 
 //LEFT SIDE AUTON BLUE ELIMS
 
 
 //AUTON SKILLS
+
 
 
 
@@ -684,11 +256,28 @@ void RED_Right_side_elims() {
 
 // Blue Alliance Right Side and gets the auton win point
 void BLUE_Right_side_awp() {
+	chassis.setPose(51.863, 23.217, 90);
+	chassis.follow(L1RED_txt, 15, 2000, false);
+	pros::delay(750);
+	ExpansionClamp.set_value(true);
+	pros::delay(750);
+	Intake.move_velocity(200);
+	pros::delay(750);
+	chassis.turnToHeading(0, 1500);
+	chassis.follow(L2RED_txt, 15, 2000);
+	pros::delay(750);
+	chassis.turnToHeading(60, 1500);
+	chassis.turnToHeading(275, 1500);
+	chassis.follow(L3RED_txt, 15, 2000);
+	chassis.follow(L4RED_txt, 15, 2000, false);
+	chassis.turnToHeading(180, 1500);
+	chassis.follow(L5RED_txt, 15, 2000);
 }
 
 // Blue Alliance Right Side elimination rounds
 void BLUE_Right_side_elims() {
 }
+
 
 
 //LEFT SIDE AUTON//
@@ -721,6 +310,7 @@ void RED_LEFT_side_elims() {
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
+
 }
 
 // Blue Alliance Left Side for elimination rounds
@@ -844,11 +434,6 @@ void competition_initialize()
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-
- // path file name is "example.txt".
-// "." is replaced with "_" to overcome c++ limitations
-
-
 void autonomous() 
 {
 	//robot size is 16x16 inch
@@ -893,21 +478,6 @@ void opcontrol()
 
 	while(true){
 		
-		/*TANK CONTROL*/
-		/*
-		driveR_train.set_reversed(true);
-		driveL_train.move(master.get_analog(ANALOG_LEFT_Y));
-		driveR_train.move(master.get_analog(ANALOG_RIGHT_Y));
-		*/
-
-		/*CURVATURE CONTROL*/
-		/*
-        int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-        int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
-		chassis.curvature(leftY, rightX);
-		*/
-
-
 		/*ARCADE CONTROLL*/
 
 		int power = -(master.get_analog(ANALOG_RIGHT_X));
@@ -956,50 +526,13 @@ void opcontrol()
 
 		//COLOR SORT BLUE ALLIANCE
 		/*Hue = Color_sensor.get_hue(); 
-		if(Hue < 15.0 and IntakeState == true)
+		if(Hue < 5.0 and IntakeState == true)
 		{
-			//pros::c::delay(175);
-			Conveyor.move_velocity(600);
-			pros::c::delay(500);
-			Conveyor.move_voltage(100);
-			//Intake.move_velocity(0);
-			IntakeState = false;
-			top_speed = false;
+			Intake.move_velocity(0);
+			pros::c::delay(250);
+			Intake.move_velocity(200);
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}*/
-
-
-		/*//LADY BRWON NOT USING TASKS
-		
-		//LADYBROWN ARM
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			LadyBrownArm(-1609 , 1500); //-1609
-			LadyBrownState = true;
-
-		}
-
-		//LADYBROWN HOLD
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			LadyBrownArm(-12000, 1500); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN SCORE
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			LadyBrownArm(-53000,1500); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN STOW
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			LadyBrownArm(15000, 1500); 
-			LadyBrownState = false;
-		}*/
-
 
 		//MOGO CLAMP
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
@@ -1019,7 +552,7 @@ void opcontrol()
 		}
 		
 		//DOINKER
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			if(DoinkerState == true)
 			{
@@ -1054,7 +587,7 @@ void opcontrol()
 			printf("top_speed=%d \n", top_speed);
 		}
 		
-		printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
+		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		//printf("hue=%f \n", Color_sensor.get_hue());
 
 		pros::delay(10);

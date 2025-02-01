@@ -230,6 +230,17 @@ ASSET(L10BLUE_txt);
 
 
 //AUTON SKILLS
+ASSET(Skills1_txt);
+ASSET(Skills2_txt);
+ASSET(Skills3_txt);
+ASSET(Skills4_txt);
+ASSET(Skills5_txt);
+ASSET(Skills6_txt);
+ASSET(Skills7_txt);
+ASSET(Skills8_txt);
+ASSET(Skills9_txt);
+ASSET(Skills10_txt);
+ASSET(Skills11_txt);
 
 
 
@@ -244,7 +255,7 @@ void RED_Right_side_awp() {
 	chassis.follow(R1RED_txt, 15, 2500, false);
 	pros::delay(1500);
 	ExpansionClamp.set_value(true);
-	pros::delay(1500);
+	pros::delay(750);
 	Intake.move_velocity(200);
 	chassis.follow(R2RED_txt, 15, 10000);
 	pros::delay(1000);
@@ -257,21 +268,20 @@ void RED_Right_side_elims() {
 // Blue Alliance Right Side and gets the auton win point
 void BLUE_Right_side_awp() {
 	chassis.setPose(51.863, 23.217, 90);
-	chassis.follow(L1RED_txt, 15, 2000, false);
+	chassis.follow(R1BLUE_txt, 15, 2000, false);
 	pros::delay(750);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	Intake.move_velocity(200);
 	pros::delay(750);
 	chassis.turnToHeading(0, 1500);
-	chassis.follow(L2RED_txt, 15, 2000);
+	chassis.follow(R2BLUE_txt, 15, 2000);
 	pros::delay(750);
-	chassis.turnToHeading(60, 1500);
 	chassis.turnToHeading(275, 1500);
-	chassis.follow(L3RED_txt, 15, 2000);
-	chassis.follow(L4RED_txt, 15, 2000, false);
-	chassis.turnToHeading(180, 1500);
-	chassis.follow(L5RED_txt, 15, 2000);
+	chassis.follow(R3BLUE_txt, 15, 2000);
+	chassis.follow(R4BLUE_txt, 15, 2000, false);
+	chassis.turnToHeading(190, 1500);
+	chassis.follow(R5BLUE_txt, 15, 2000);
 }
 
 // Blue Alliance Right Side elimination rounds
@@ -295,11 +305,11 @@ void RED_LEFT_side_awp() {
 	chassis.turnToHeading(0, 1500);
 	chassis.follow(L2RED_txt, 15, 2000);
 	pros::delay(750);
-	chassis.turnToHeading(300, 1500);
+	//chassis.turnToHeading(300, 1500);
 	chassis.turnToHeading(85, 1500);
 	chassis.follow(L3RED_txt, 15, 2000);
 	chassis.follow(L4RED_txt, 15, 2000, false);
-	chassis.turnToHeading(180, 1500);
+	chassis.turnToHeading(170, 1500);
 	chassis.follow(L5RED_txt, 15, 2000);
 
 
@@ -310,7 +320,14 @@ void RED_LEFT_side_elims() {
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
-
+	chassis.setPose(52.311, -58.847, 90);
+	chassis.follow(L1BLUE_txt, 15, 2500, false);
+	pros::delay(1500);
+	ExpansionClamp.set_value(true);
+	pros::delay(750);
+	Intake.move_velocity(200);
+	chassis.follow(L2BLUE_txt, 15, 10000);
+	pros::delay(10000);
 }
 
 // Blue Alliance Left Side for elimination rounds
@@ -320,12 +337,63 @@ void BLUE_LEFT_side_elims() {
 
 //SKILLS//
 void skills() {
+	chassis.setPose(-59.008, -0.621, 90);
+	Intake.move_velocity(200);
+	pros::delay(1000);
+	chassis.follow(Skills1_txt, 15, 2500);
+	chassis.turnToHeading(0, 2000);
+	chassis.follow(Skills2_txt, 15, 2500, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(true);
+	pros::delay(2000);
+	chassis.turnToHeading(90, 2000);
+	chassis.follow(Skills3_txt, 15, 2500);
+	pros::delay(2000);
+	chassis.turnToHeading(180, 2000);
+	chassis.follow(Skills4_txt, 15, 2500);
+	pros::delay(2000);
+	
 }
 
 
 void on_center_button() {}
 
 
+/*bool top_speed = false;
+
+
+void my_task_fn() {
+    while(true){	
+		//UNSTUCK CONVEYOR
+		if(Intake.get_actual_velocity() < 5 and top_speed == true)
+		{
+
+			if(LadyBrownState == false)
+			{
+				Intake.move_velocity(-200);
+				pros::c::delay(300);
+				Intake.move_velocity(200);
+				top_speed = false;
+			}
+			else
+			{
+				Intake.move_velocity(0);
+				pros::delay(300);
+				Intake.move_velocity(200);
+				pros::delay(300);
+				Intake.move_velocity(0);
+				top_speed = false;
+			}
+		}	
+
+		//CHECK SPEED
+		if(Intake.get_actual_velocity() >= 180 and IntakeState == true)
+		{
+			top_speed = true;
+			printf("top_speed=%d \n", top_speed);
+		}
+	}	
+}*/
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -336,13 +404,13 @@ void on_center_button() {}
 void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-	 pros::Task LadyBrownTask{[=] {
+	pros::Task LadyBrownTask{[=] {
             while(true)
 		{
 		//LADYBROWN ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			LadyBrownArm(-1609 , 1500); 
+			LadyBrownArm(-5010 , 1500); 
 			LadyBrownState = true;
 
 		}
@@ -350,14 +418,14 @@ void initialize() {
 		//LADYBROWN HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			LadyBrownArm(-12000, 1500); 
+			LadyBrownArm(-14000, 1500); 
 			LadyBrownState = false;
 		}
 
 		//LADYBROWN SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
-			LadyBrownArm(-53000,1500); 
+			LadyBrownArm(-55000,1500); 
 			LadyBrownState = false;
 		}
 
@@ -369,7 +437,8 @@ void initialize() {
 		}
 		pros::delay(10);
 		}
-    }};
+    }
+	};
 	/*
     pros::Task screen_task([&]() {
         while (true) {
@@ -535,7 +604,7 @@ void opcontrol()
 		}*/
 
 		//MOGO CLAMP
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			if(ExpansionClampState == true)
 			{
@@ -552,7 +621,7 @@ void opcontrol()
 		}
 		
 		//DOINKER
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
 		{
 			if(DoinkerState == true)
 			{
@@ -578,7 +647,12 @@ void opcontrol()
 				Intake.move_velocity(200);
 				top_speed = false;
 			}
-		}
+			else
+			{
+				Intake.move_velocity(0);
+				top_speed = false;
+			}
+		}	
 
 		//CHECK SPEED
 		if(Intake.get_actual_velocity() >= 180 and IntakeState == true)

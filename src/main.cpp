@@ -369,7 +369,7 @@ void BLUE_LEFT_side_elims() {
 void skills() {
 	chassis.setPose(-59.008, -0.621, 90);
 	Intake.move_velocity(200);
-	pros::delay(1000);
+	pros::delay(750);
 	chassis.follow(Skills1_txt, 15, 2500);
 	chassis.turnToHeading(0, 2000);
 	chassis.follow(Skills2_txt, 15, 2500, false);
@@ -382,6 +382,26 @@ void skills() {
 	chassis.turnToHeading(180, 2000);
 	chassis.follow(Skills4_txt, 15, 2500);
 	pros::delay(2000);
+	chassis.turnToHeading(90, 2000);
+	chassis.follow(Skills5_txt, 15, 2500);
+	chassis.turnToHeading(180, 2000);
+	chassis.follow(Skills6_txt, 15, 2500);
+	chassis.turnToHeading(140, 2000);
+	chassis.follow(Skills7_txt, 15, 2500);
+	chassis.turnToHeading(73.333, 2000);
+	chassis.follow(Skills8_txt, 15, 2500, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(false);
+	chassis.follow(Skills8_txt, 15, 2500);
+	chassis.turnToHeading(0, 2000);
+	chassis.follow(Skills9_txt, 15, 2500);
+	chassis.turnToHeading(180, 2000);
+	chassis.follow(Skills10_txt, 15, 2500, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(true);
+	pros::delay(2000);
+	chassis.follow(Skills11_txt, 15, 20000);
+
 	
 }
 
@@ -535,8 +555,7 @@ void competition_initialize()
  */
 void autonomous() 
 {
-	//robot size is 16x16 inch
-
+	
 	ms::call_selected_auton();
 
 	pros::delay(1000);

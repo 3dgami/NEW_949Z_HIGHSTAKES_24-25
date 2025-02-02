@@ -1,0 +1,42 @@
+-48.481, -57.073, 100
+-48.444, -55.073, 100
+-48.406, -53.073, 100
+-48.369, -51.074, 100
+-48.332, -49.074, 100
+-48.294, -47.074, 100
+-48.257, -45.075, 100
+-48.219, -43.075, 100
+-48.182, -41.075, 100
+-48.144, -39.076, 100
+-48.107, -37.076, 100
+-48.07, -35.076, 100
+-48.032, -33.077, 100
+-47.995, -31.077, 100
+-47.957, -29.077, 97.693
+-47.92, -27.078, 95.058
+-47.882, -25.078, 92.347
+-47.845, -23.079, 89.554
+-47.808, -21.079, 86.672
+-47.77, -19.079, 83.69
+-47.733, -17.08, 80.598
+-47.695, -15.08, 77.382
+-47.658, -13.08, 74.027
+-47.62, -11.081, 70.512
+-47.583, -9.081, 66.813
+-47.546, -7.081, 62.897
+-47.508, -5.082, 58.72
+-47.471, -3.082, 54.222
+-47.433, -1.082, 49.315
+-47.396, 0.917, 43.863
+-47.358, 2.917, 37.63
+-47.321, 4.917, 30.133
+-47.284, 6.916, 20
+-47.256, 8.395, 0
+-47.256, 8.395, 0
+-46.882, 28.392, 0
+endData
+127
+100
+200
+-48.481, -57.073, -47.869, -24.339, -47.869, -24.339, -47.256, 8.395
+#PATH.JERRYIO-DATA {"appVersion":"0.8.3","format":"LemLib v0.5","gc":{"robotWidth":13,"robotHeight":18,"robotIsHolonomic":false,"showRobot":true,"uol":2.54,"pointDensity":2,"controlMagnetDistance":1.968503937007874,"fieldImage":{"displayName":"V5RC 2025 - High Stakes (Skills)","signature":"V5RC 2025 - High Stakes (Skills)","origin":{"__type":"built-in"}},"coordinateSystem":"VEX Gaming Positioning System"},"paths":[{"segments":[{"controls":[{"uid":"8n5ZWMLTEa","x":-48.48121211569202,"y":-57.07255343082115,"lock":false,"visible":true,"heading":0,"__type":"end-point"},{"uid":"A4o4uQN48B","x":-47.255878187291366,"y":8.395287886585024,"lock":false,"visible":true,"heading":0,"__type":"end-point"}],"speedProfiles":[],"lookaheadKeyframes":[],"uid":"uDY8AZFMVP"}],"pc":{"speedLimit":{"minLimit":{"value":0,"label":"0"},"maxLimit":{"value":127,"label":"127"},"step":1,"from":20,"to":100},"bentRateApplicableRange":{"minLimit":{"value":0,"label":"0"},"maxLimit":{"value":1,"label":"1"},"step":0.001,"from":0,"to":0.1},"maxDecelerationRate":127},"name":"Path","uid":"oAqVgAZCSv","lock":false,"visible":true}]}

@@ -82,13 +82,13 @@ lemlib::OdomSensors sensors(nullptr, //&vertical_tracking_wheel, // vertical tra
 // input curve for throttle input during driver control
 lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
                                      10, // minimum output where drivetrain will move out of 127
-                                     1.019 // expo curve gain
+                                     1.024 // expo curve gain
 );
 
 // input curve for steer input during driver control
 lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
                                   10, // minimum output where drivetrain will move out of 127
-                                  1.019 // expo curve gain
+                                  1.024 // expo curve gain
 );
 
 // create the chassis
@@ -306,8 +306,7 @@ void BLUE_Right_side_elims() {
 
 //LEFT SIDE AUTON//
 
-// RED Alliance Left Side and gets the auton win point
-//still testing not final
+// RED Alliance Left Side
 void RED_LEFT_side_awp() {
 	chassis.setPose(-51.863, 23.217, 270);
 	chassis.follow(L1RED_txt, 15, 2000, false);
@@ -405,45 +404,8 @@ void skills() {
 	
 }
 
-
 void on_center_button() {}
 
-
-/*bool top_speed = false;
-
-
-void my_task_fn() {
-    while(true){	
-		//UNSTUCK CONVEYOR
-		if(Intake.get_actual_velocity() < 5 and top_speed == true)
-		{
-
-			if(LadyBrownState == false)
-			{
-				Intake.move_velocity(-200);
-				pros::c::delay(300);
-				Intake.move_velocity(200);
-				top_speed = false;
-			}
-			else
-			{
-				Intake.move_velocity(0);
-				pros::delay(300);
-				Intake.move_velocity(200);
-				pros::delay(300);
-				Intake.move_velocity(0);
-				top_speed = false;
-			}
-		}	
-
-		//CHECK SPEED
-		if(Intake.get_actual_velocity() >= 180 and IntakeState == true)
-		{
-			top_speed = true;
-			printf("top_speed=%d \n", top_speed);
-		}
-	}	
-}*/
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -455,7 +417,9 @@ void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 	pros::Task LadyBrownTask{[=] {
-            while(true)
+		double Hue;
+		Color_sensor.set_led_pwm(50);
+        while(true)
 		{
 		//LADYBROWN ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
@@ -487,6 +451,26 @@ void initialize() {
 		}
 		pros::delay(10);
 		}
+
+		//COLOR SORT BLUE ALLIANCE
+		Hue = Color_sensor.get_hue(); 
+		if(Hue < 15.0 and Intake.get_target_velocity() == 300) 
+		{
+			pros::c::delay(250);
+			//Intake.move_velocity(0);
+			pros::c::delay(200);
+			//Intake.move_velocity(300);
+			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+		}
+		/*if(220 < Hue < 260 and Intake.get_target_velocity() == 300) 
+		{
+			//Intake.move_velocity(0);
+			pros::c::delay(250);
+			//Intake.move_velocity(300);
+			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+		}*/
+
+
     }
 	};
 	/*
@@ -583,28 +567,16 @@ void autonomous()
 
 void opcontrol()
 {
-	
-	int left;
-	int right;
-	double Hue;
-	bool IntakeState;
-	bool IntakeREV;
-	bool top_speed;
-
-	top_speed = false;
-	Color_sensor.set_led_pwm(10);
+	bool IntakeState = false;
+	bool IntakeREV = false;
+	bool top_speed = false;
 
 	while(true){
-		
-		/*ARCADE CONTROLL*/
 
-		int power = -(master.get_analog(ANALOG_RIGHT_X));
-		int turn = master.get_analog(ANALOG_LEFT_Y);
-		left = power - turn; //(((power - turn)^2) / 190.5); //used to just be power - turn
-		right = power + turn; //(((power + turn)^2) / 190.5); 
+		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
-		driveL_train.move(-left);
-		driveR_train.move(right);
+        chassis.arcade(leftY, rightX);
 
 		//INTAKE CONTROL
 		if(master.get_digital_new_press(DIGITAL_A))
@@ -641,17 +613,6 @@ void opcontrol()
 			printf("Intake state=%d top_speed=%d intake velocity=%f \n", IntakeState, top_speed, Intake.get_actual_velocity());
 		}
 
-
-		//COLOR SORT BLUE ALLIANCE
-		/*Hue = Color_sensor.get_hue(); 
-		if(Hue < 5.0 and IntakeState == true)
-		{
-			Intake.move_velocity(0);
-			pros::c::delay(250);
-			Intake.move_velocity(200);
-			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
-		}*/
-
 		//MOGO CLAMP
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
@@ -686,7 +647,7 @@ void opcontrol()
 		}
 
 		//UNSTUCK CONVEYOR
-		if(Intake.get_actual_velocity() < 5 and top_speed == true)
+		/*if(Intake.get_actual_velocity() < 5 and top_speed == true)
 		{
 
 			if(LadyBrownState == false)
@@ -701,14 +662,14 @@ void opcontrol()
 				Intake.move_velocity(0);
 				top_speed = false;
 			}
-		}	
+		}
 
 		//CHECK SPEED
 		if(Intake.get_actual_velocity() >= 180 and IntakeState == true)
 		{
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);
-		}
+		}*/
 		
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		//printf("hue=%f \n", Color_sensor.get_hue());

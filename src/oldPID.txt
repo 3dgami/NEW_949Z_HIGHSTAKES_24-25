@@ -12,7 +12,16 @@ Drive methods
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 		chassis.curvature(leftY, rightX);
 		*/
+		
+	/*ARCADE CONTROLL*/
 
+		int power = -(master.get_analog(ANALOG_RIGHT_X));
+		int turn = master.get_analog(ANALOG_LEFT_Y);
+		left = power - turn; //(((power - turn)^2) / 190.5); //used to just be power - turn
+		right = power + turn; //(((power + turn)^2) / 190.5); 
+
+		driveL_train.move(-left);
+		driveR_train.move(right);
 
 
 void driveTrain(int distance, int timeout)

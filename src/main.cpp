@@ -252,13 +252,27 @@ ASSET(Skills11_txt);
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
 	chassis.setPose(-52.311, -58.847, 270);
-	chassis.follow(R1RED_txt, 15, 2500, false);
-	pros::delay(1500);
+	chassis.follow(R1RED_txt, 15, 3500, false);
+	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	Intake.move_velocity(200);
-	chassis.follow(R2RED_txt, 15, 10000);
+	chassis.follow(R3RED_txt, 15, 4000);
+	pros::delay(1500);
+	ExpansionClamp.set_value(false);
+	pros::delay(500);
+	chassis.turnToHeading(270, 1000);
+	chassis.follow(R4RED_txt, 15, 2500, false);
 	pros::delay(1000);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
+	chassis.turnToHeading(140, 1000);
+	chassis.follow(R6RED_txt, 15, 2500);
+	pros::delay(1000);
+	chassis.follow(R6RED_txt, 15, 2500, false);
+	pros::delay(2000);
+	chassis.turnToHeading(0, 1000);
+	chassis.follow(R7RED_txt, 15, 2500);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -280,7 +294,7 @@ void BLUE_Right_side_awp() {
 	chassis.turnToHeading(275, 1500);
 	chassis.follow(R3BLUE_txt, 15, 2000);
 	chassis.follow(R4BLUE_txt, 15, 2000, false);
-	chassis.turnToHeading(190, 1500);
+	chassis.turnToHeading(180, 1500);
 	chassis.follow(R5BLUE_txt, 15, 2000);
 }
 
@@ -309,7 +323,7 @@ void RED_LEFT_side_awp() {
 	chassis.turnToHeading(85, 1500);
 	chassis.follow(L3RED_txt, 15, 2000);
 	chassis.follow(L4RED_txt, 15, 2000, false);
-	chassis.turnToHeading(170, 1500);
+	chassis.turnToHeading(180, 1500);
 	chassis.follow(L5RED_txt, 15, 2000);
 
 
@@ -321,13 +335,29 @@ void RED_LEFT_side_elims() {
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
 	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUE_txt, 15, 2500, false);
-	pros::delay(1500);
+	chassis.follow(L1BLUE_txt, 15, 3500, false);
+	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	Intake.move_velocity(200);
-	chassis.follow(L2BLUE_txt, 15, 10000);
-	pros::delay(10000);
+	chassis.follow(L3BLUE_txt, 15, 4000);
+	pros::delay(1500);
+	ExpansionClamp.set_value(false);
+	pros::delay(500);
+	chassis.turnToHeading(90, 1000);
+	chassis.follow(L4BLUE_txt, 15, 2500, false);
+	pros::delay(1000);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
+	chassis.turnToHeading(220, 1000);
+	chassis.follow(L6BLUE_txt, 15, 2500);
+	pros::delay(1000);
+	chassis.follow(L6BLUE_txt, 15, 2500, false);
+	pros::delay(2000);
+	chassis.turnToHeading(0, 1000);
+	chassis.follow(L7BLUE_txt, 15, 2500);
+
+
 }
 
 // Blue Alliance Left Side for elimination rounds

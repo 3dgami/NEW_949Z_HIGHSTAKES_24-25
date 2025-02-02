@@ -33,6 +33,7 @@ pros::IMU imu(10);
 bool ExpansionClampState;
 bool DoinkerState;
 bool LadyBrownState;
+bool AllianceBlue;
 
 pros::ADIDigitalOut ExpansionClamp('A');
 pros::ADIDigitalOut Doinker('B');
@@ -81,13 +82,13 @@ lemlib::OdomSensors sensors(nullptr, //&vertical_tracking_wheel, // vertical tra
 
 // input curve for throttle input during driver control
 lemlib::ExpoDriveCurve throttleCurve(3, // joystick deadband out of 127
-                                     10, // minimum output where drivetrain will move out of 127
+                                     40, // minimum output where drivetrain will move out of 127
                                      1.024 // expo curve gain
 );
 
 // input curve for steer input during driver control
 lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
-                                  10, // minimum output where drivetrain will move out of 127
+                                  40, // minimum output where drivetrain will move out of 127
                                   1.024 // expo curve gain
 );
 
@@ -251,6 +252,7 @@ ASSET(Skills11_txt);
 
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
+	AllianceBlue = false;
 	chassis.setPose(-52.311, -58.847, 270);
 	chassis.follow(R1RED_txt, 15, 3500, false);
 	pros::delay(2000);
@@ -277,10 +279,12 @@ void RED_Right_side_awp() {
 
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
+	AllianceBlue = false;
 }
 
 // Blue Alliance Right Side and gets the auton win point
 void BLUE_Right_side_awp() {
+	AllianceBlue = true;
 	chassis.setPose(51.863, 23.217, 90);
 	chassis.follow(R1BLUE_txt, 15, 2000, false);
 	pros::delay(750);
@@ -300,6 +304,7 @@ void BLUE_Right_side_awp() {
 
 // Blue Alliance Right Side elimination rounds
 void BLUE_Right_side_elims() {
+	AllianceBlue = true;
 }
 
 
@@ -308,6 +313,7 @@ void BLUE_Right_side_elims() {
 
 // RED Alliance Left Side
 void RED_LEFT_side_awp() {
+	AllianceBlue = false;
 	chassis.setPose(-51.863, 23.217, 270);
 	chassis.follow(L1RED_txt, 15, 2000, false);
 	pros::delay(750);
@@ -330,9 +336,11 @@ void RED_LEFT_side_awp() {
 
 // RED Alliance Left Side elimination rounds
 void RED_LEFT_side_elims() {
+	AllianceBlue = false;
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
+	AllianceBlue = true;
 	chassis.setPose(52.311, -58.847, 90);
 	chassis.follow(L1BLUE_txt, 15, 3500, false);
 	pros::delay(2000);
@@ -361,11 +369,13 @@ void BLUE_LEFT_side_awp() {
 
 // Blue Alliance Left Side for elimination rounds
 void BLUE_LEFT_side_elims() {
+	AllianceBlue = true;
 }
 
 
 //SKILLS//
 void skills() {
+	AllianceBlue = false;
 	chassis.setPose(-59.008, -0.621, 90);
 	Intake.move_velocity(200);
 	pros::delay(750);
@@ -454,7 +464,7 @@ void initialize() {
 
 		//COLOR SORT BLUE ALLIANCE
 		Hue = Color_sensor.get_hue(); 
-		if(Hue < 15.0 and Intake.get_target_velocity() == 300) 
+		if(Hue < 15.0 and Intake.get_target_velocity() == 300 and AllianceBlue == false) 
 		{
 			pros::c::delay(250);
 			//Intake.move_velocity(0);
@@ -462,13 +472,14 @@ void initialize() {
 			//Intake.move_velocity(300);
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}
-		/*if(220 < Hue < 260 and Intake.get_target_velocity() == 300) 
+		if(220 < Hue < 260 and Intake.get_target_velocity() == 300 and AllianceBlue == true) 
 		{
+			pros::c::delay(250);
 			//Intake.move_velocity(0);
 			pros::c::delay(250);
 			//Intake.move_velocity(300);
 			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
-		}*/
+		}
 
 
     }

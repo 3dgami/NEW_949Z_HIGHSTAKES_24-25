@@ -175,6 +175,7 @@ void LadyBrownArm(int position, int timeout)
 //RIGHT SIDE AUTON RED AWP
 ASSET(R1RED_txt);
 ASSET(R2RED_txt);
+ASSET(R25RED_txt);
 ASSET(R3RED_txt);
 ASSET(R4RED_txt);
 ASSET(R5RED_txt);
@@ -254,28 +255,27 @@ ASSET(Skills11_txt);
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
 	AllianceBlue = false;
-	chassis.setPose(-52.311, -58.847, 270);
-	chassis.follow(R1RED_txt, 15, 3500, false);
-	pros::delay(2000);
-	ExpansionClamp.set_value(true);
-	pros::delay(750);
-	Intake.move_velocity(200);
-	chassis.follow(R3RED_txt, 15, 4000);
-	pros::delay(1500);
-	ExpansionClamp.set_value(false);
-	pros::delay(500);
+	chassis.setPose(-49.882, -57.423, 90);
+	Intake.move_velocity(-600);
+	chassis.follow(R1RED_txt, 15, 3500);
+	Intake.move_velocity(0);
+	Doinker.set_value(true);
+	chassis.follow(R2RED_txt, 15, 2500, false);
+	Doinker.set_value(false);
 	chassis.turnToHeading(270, 1000);
-	chassis.follow(R4RED_txt, 15, 2500, false);
-	pros::delay(1000);
+	chassis.follow(R3RED_txt, 15, 2500, false);
 	ExpansionClamp.set_value(true);
-	pros::delay(1000);
-	chassis.turnToHeading(140, 1000);
-	chassis.follow(R6RED_txt, 15, 2500);
-	pros::delay(1000);
-	chassis.follow(R6RED_txt, 15, 2500, false);
-	pros::delay(2000);
-	chassis.turnToHeading(0, 1000);
-	chassis.follow(R7RED_txt, 15, 2500);
+	IntakeConveyor.move_velocity(600);
+	chassis.follow(R3RED_txt, 15, 2500);
+	ExpansionClamp.set_value(false);
+	IntakeConveyor.move_velocity(0);
+	chassis.turnToHeading(215, 2500);
+	chassis.follow(R4RED_txt, 15, 2500, false);
+	ExpansionClamp.set_value(true);
+	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(-600);
+	chassis.turnToHeading(0, 2500);
+	chassis.follow(R5RED_txt, 15, 2500, false);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -397,21 +397,17 @@ void skills() {
 	chassis.follow(Skills5_txt, 15, 3000);
 	chassis.turnToHeading(270, 2000);
 	chassis.follow(Skills6_txt, 15, 3000);
-	chassis.turnToHeading(140, 2000);
-	chassis.follow(Skills7_txt, 15, 3000);
-	chassis.turnToHeading(73.333, 2000);
-	chassis.follow(Skills8_txt, 15, 3000, false);
-	pros::delay(500);
+	chassis.turnToHeading(15, 2000);
+	chassis.follow(Skills7_txt, 15, 3000, false);
 	ExpansionClamp.set_value(false);
 	chassis.follow(Skills8_txt, 15, 3000);
-	chassis.turnToHeading(0, 2000);
-	chassis.follow(Skills9_txt, 15, 3000);
 	chassis.turnToHeading(180, 2000);
-	chassis.follow(Skills10_txt, 15, 3000, false);
+	chassis.follow(Skills9_txt, 15, 3000, false);
 	pros::delay(500);
 	ExpansionClamp.set_value(true);
 	pros::delay(500);
-	//chassis.follow(Skills11_txt, 15, 20000);
+	chassis.turnToHeading(90, 2000);
+	//chassis.follow(Skills10_txt, 15, 3000, false);
 
 	
 }

@@ -31,15 +31,15 @@ pros::Rotation LadyBrownRotate(3);
 pros::Optical Color_sensor(19);
 pros::IMU imu(10);
 
+pros::ADIDigitalOut ExpansionClamp('A');
+pros::ADIDigitalOut Doinker('B');
+
 bool ExpansionClampState;
 bool DoinkerState;
 bool LadyBrownState;
 bool AllianceBlue;
 int position = 15000;
 double Hue;
-
-pros::ADIDigitalOut ExpansionClamp('A');
-pros::ADIDigitalOut Doinker('B');
 
 
 // drivetrain settings //UPDATE
@@ -209,12 +209,10 @@ void ColorSort(void* param)
 //RIGHT SIDE AUTON RED AWP
 ASSET(R1RED_txt);
 ASSET(R2RED_txt);
-ASSET(R25RED_txt);
 ASSET(R3RED_txt);
 ASSET(R4RED_txt);
 ASSET(R5RED_txt);
 ASSET(R6RED_txt);
-ASSET(R65RED_txt);
 ASSET(R7RED_txt);
 ASSET(R8RED_txt);
 ASSET(R9RED_txt);
@@ -254,8 +252,6 @@ ASSET(L10RED_txt);
 
 //LEFT SIDE AUTON BLUE AWP
 ASSET(L1BLUE_txt);
-ASSET(L1BLUENEW_txt);
-ASSET(L3BLUENEW_txt);
 ASSET(L2BLUE_txt);
 ASSET(L3BLUE_txt);
 ASSET(L4BLUE_txt);
@@ -298,21 +294,21 @@ void RED_Right_side_awp() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(R3RED_txt, 15, 6000);
+	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
-	chassis.follow(R4RED_txt, 15, 2500, false);
+	chassis.follow(R3RED_txt, 15, 2500, false);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	chassis.follow(R5RED_txt, 15, 2500);
+	chassis.follow(R4RED_txt, 15, 2500);
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
-	chassis.follow(R6RED_txt, 15, 2500);
+	chassis.follow(R5RED_txt, 15, 2500);
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -325,22 +321,22 @@ void RED_Right_side_elims() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(R3RED_txt, 15, 6000);
+	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
-	chassis.follow(R4RED_txt, 15, 2500, false);
+	chassis.follow(R3RED_txt, 15, 2500, false);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	chassis.follow(R5RED_txt, 15, 2500);
+	chassis.follow(R4RED_txt, 15, 2500);
 	pros::delay(1000);
 	Intake.move_velocity(0);
 	chassis.turnToHeading(270, 1000);
-	//chassis.follow(R6RED_txt, 15, 2500);
+	
 }
 
 // Blue Alliance Right Side and gets the auton win point
@@ -403,60 +399,52 @@ void RED_LEFT_side_elims() {
 void BLUE_LEFT_side_awp() {
 	AllianceBlue = true;
 	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUENEW_txt, 15, 3500, false);
+	chassis.follow(L1BLUE_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(L3BLUENEW_txt, 15, 6000);
+	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
-	chassis.follow(L4BLUE_txt, 15, 2500, false);
+	chassis.follow(L3BLUE_txt, 15, 2500, false);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	chassis.follow(L5BLUE_txt, 15, 2500);
+	chassis.follow(L4BLUE_txt, 15, 2500);
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
-	chassis.follow(L6BLUE_txt, 15, 2500);
-	//chassis.follow(L6BLUE_txt, 15, 2500, false);
-	//pros::delay(2000);
-	//chassis.turnToHeading(0, 1000);
-	//chassis.follow(L7BLUE_txt, 15, 2500);
-
-
+	chassis.follow(L5BLUE_txt, 15, 2500);
 }
 
 // Blue Alliance Left Side for elimination rounds
 void BLUE_LEFT_side_elims() {
 	AllianceBlue = true;
 	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUENEW_txt, 15, 3500, false);
+	chassis.follow(L1BLUE_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(L3BLUENEW_txt, 15, 6000);
+	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
-	chassis.follow(L4BLUE_txt, 15, 2500, false);
+	chassis.follow(L3BLUE_txt, 15, 2500, false);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	chassis.follow(L5BLUE_txt, 15, 2500);
+	chassis.follow(L4BLUE_txt, 15, 2500);
 	pros::delay(1000);
 	Intake.move_velocity(0);
 	chassis.turnToHeading(90, 1000);
-	
-	//chassis.follow(L6BLUE_txt, 15, 2500);
 }
 
 

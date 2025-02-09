@@ -35,6 +35,8 @@ bool ExpansionClampState;
 bool DoinkerState;
 bool LadyBrownState;
 bool AllianceBlue;
+int position = 15000;
+double Hue;
 
 pros::ADIDigitalOut ExpansionClamp('A');
 pros::ADIDigitalOut Doinker('B');
@@ -62,7 +64,7 @@ lemlib::ControllerSettings lateral_controller(18, // proportional gain (kP)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angular_controller(2, // proportional gain (kP)
+lemlib::ControllerSettings angular_controller(1.5, // proportional gain (kP)
                                              0, // integral gain (kI)
                                              10, // derivative gain (kD)
                                              3, // anti windup
@@ -100,10 +102,10 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
                         sensors // odometry sensors
 );
 
-void LadyBrownArm(int position, int timeout)
+void LadyBrownArm()
 {	
 
-	double kp = 0.5;
+	double kp = 0.8;
 	double ki = 1.0;
 	double kd = -1.0;   /*derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
@@ -123,13 +125,8 @@ void LadyBrownArm(int position, int timeout)
 	errorTerm = position - LadyBrownRotate.get_position();
 
 
-	while (errorTerm > 50 or errorTerm < -50 and count < timeout) // and SERT_count < SERTx
+	while (true) 
 	{
-		if(count > timeout or SERT_count > SERT)
-		{
-			break;
-			printf("TIMEOUT \n");
-		}
 
 		errorTerm = position - LadyBrownRotate.get_position();
 
@@ -161,15 +158,52 @@ void LadyBrownArm(int position, int timeout)
 		
 		//SERT_bool = (errorTerm < 15) ? true : false;
 		//SERT_count = (SERT_bool = true) ? SERT_count + 20 : SERT_count;
-		count += 20;
+		//count += 20;
 
 	}
+	//LadyBrownRight.move_voltage(0);
+	//LadyBrownLeft.move_voltage(0);
 	//pros::delay(100);
 	printf("End\nErr=%d", errorTerm);
 
 	return;
 }
 
+void ColorSort(void* param)
+{
+	Color_sensor.set_led_pwm(50);
+
+	if(AllianceBlue == true)
+	{
+		while(true)
+		{
+			if(Hue < 15.0 and IntakeConveyor.get_target_velocity() == 600)
+			{
+			pros::c::delay(250);
+			IntakeConveyor.move_velocity(0);
+			pros::c::delay(250);
+			IntakeConveyor.move_velocity(600);
+			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+			}
+			pros::delay(5);
+		}
+	}
+	else 
+	{
+		while(true)
+		{
+			if(220 < Hue and Hue > 260 and IntakeConveyor.get_target_velocity() == 600) 
+			{
+			pros::c::delay(250);
+			IntakeConveyor.move_velocity(0);
+			pros::c::delay(250);
+			IntakeConveyor.move_velocity(600);
+			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+			}
+			pros::delay(5);
+		}
+	}
+}
 //AUTON//
 
 //RIGHT SIDE AUTON RED AWP
@@ -180,6 +214,7 @@ ASSET(R3RED_txt);
 ASSET(R4RED_txt);
 ASSET(R5RED_txt);
 ASSET(R6RED_txt);
+ASSET(R65RED_txt);
 ASSET(R7RED_txt);
 ASSET(R8RED_txt);
 ASSET(R9RED_txt);
@@ -219,6 +254,8 @@ ASSET(L10RED_txt);
 
 //LEFT SIDE AUTON BLUE AWP
 ASSET(L1BLUE_txt);
+ASSET(L1BLUENEW_txt);
+ASSET(L3BLUENEW_txt);
 ASSET(L2BLUE_txt);
 ASSET(L3BLUE_txt);
 ASSET(L4BLUE_txt);
@@ -255,32 +292,55 @@ ASSET(Skills11_txt);
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
 	AllianceBlue = false;
-	chassis.setPose(-49.882, -57.423, 90);
-	Intake.move_velocity(-600);
-	chassis.follow(R1RED_txt, 15, 3500);
-	Intake.move_velocity(0);
-	Doinker.set_value(true);
-	chassis.follow(R2RED_txt, 15, 2500, false);
-	Doinker.set_value(false);
-	chassis.turnToHeading(270, 1000);
-	chassis.follow(R3RED_txt, 15, 2500, false);
+	chassis.setPose(-52.311, -58.847, 270);
+	chassis.follow(R1RED_txt, 15, 3500, false);
+	pros::delay(2000);
 	ExpansionClamp.set_value(true);
+	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(R3RED_txt, 15, 2500);
+	chassis.follow(R3RED_txt, 15, 6000);
+	pros::delay(1500);
 	ExpansionClamp.set_value(false);
-	IntakeConveyor.move_velocity(0);
-	chassis.turnToHeading(215, 2500);
-	chassis.follow(R4RED_txt, 15, 2500, false);
-	ExpansionClamp.set_value(true);
-	IntakeConveyor.move_velocity(600);
+	pros::delay(500);
 	Intake.move_velocity(-600);
-	chassis.turnToHeading(0, 2500);
-	chassis.follow(R5RED_txt, 15, 2500, false);
+	chassis.turnToHeading(270, 1000);
+	chassis.follow(R4RED_txt, 15, 2500, false);
+	pros::delay(1000);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(R5RED_txt, 15, 2500);
+	pros::delay(1000);
+	chassis.turnToHeading(0, 1000);
+	chassis.follow(R6RED_txt, 15, 2500);
 }
 
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
 	AllianceBlue = false;
+	AllianceBlue = false;
+	chassis.setPose(-52.311, -58.847, 270);
+	chassis.follow(R1RED_txt, 15, 3500, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(true);
+	pros::delay(750);
+	IntakeConveyor.move_velocity(600);
+	chassis.follow(R3RED_txt, 15, 6000);
+	pros::delay(1500);
+	ExpansionClamp.set_value(false);
+	pros::delay(500);
+	Intake.move_velocity(-600);
+	chassis.turnToHeading(270, 1000);
+	chassis.follow(R4RED_txt, 15, 2500, false);
+	pros::delay(1000);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(R5RED_txt, 15, 2500);
+	pros::delay(1000);
+	Intake.move_velocity(0);
+	chassis.turnToHeading(270, 1000);
+	//chassis.follow(R6RED_txt, 15, 2500);
 }
 
 // Blue Alliance Right Side and gets the auton win point
@@ -343,27 +403,30 @@ void RED_LEFT_side_elims() {
 void BLUE_LEFT_side_awp() {
 	AllianceBlue = true;
 	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUE_txt, 15, 3500, false);
+	chassis.follow(L1BLUENEW_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
-	Intake.move_velocity(200);
-	chassis.follow(L3BLUE_txt, 15, 4000);
+	IntakeConveyor.move_velocity(600);
+	chassis.follow(L3BLUENEW_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L4BLUE_txt, 15, 2500, false);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
-	chassis.turnToHeading(220, 1000);
-	chassis.follow(L6BLUE_txt, 15, 2500);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(L5BLUE_txt, 15, 2500);
 	pros::delay(1000);
-	chassis.follow(L6BLUE_txt, 15, 2500, false);
-	pros::delay(2000);
 	chassis.turnToHeading(0, 1000);
-	chassis.follow(L7BLUE_txt, 15, 2500);
+	chassis.follow(L6BLUE_txt, 15, 2500);
+	//chassis.follow(L6BLUE_txt, 15, 2500, false);
+	//pros::delay(2000);
+	//chassis.turnToHeading(0, 1000);
+	//chassis.follow(L7BLUE_txt, 15, 2500);
 
 
 }
@@ -371,42 +434,62 @@ void BLUE_LEFT_side_awp() {
 // Blue Alliance Left Side for elimination rounds
 void BLUE_LEFT_side_elims() {
 	AllianceBlue = true;
+	chassis.setPose(52.311, -58.847, 90);
+	chassis.follow(L1BLUENEW_txt, 15, 3500, false);
+	pros::delay(2000);
+	ExpansionClamp.set_value(true);
+	pros::delay(750);
+	IntakeConveyor.move_velocity(600);
+	chassis.follow(L3BLUENEW_txt, 15, 6000);
+	pros::delay(1500);
+	ExpansionClamp.set_value(false);
+	pros::delay(500);
+	Intake.move_velocity(-600);
+	chassis.turnToHeading(90, 1000);
+	chassis.follow(L4BLUE_txt, 15, 2500, false);
+	pros::delay(1000);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	chassis.follow(L5BLUE_txt, 15, 2500);
+	pros::delay(1000);
+	Intake.move_velocity(0);
+	chassis.turnToHeading(90, 1000);
+	
+	//chassis.follow(L6BLUE_txt, 15, 2500);
 }
 
 
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
-	chassis.setPose(-59.008, -0.621, 90);
-	Intake.move_velocity(-200);
+	chassis.setPose(-58.367, -0.434, 90);
 	IntakeConveyor.move_velocity(600);
-	pros::delay(750);
+	Intake.move_velocity(-600);
+	pros::delay(1000);
 	chassis.follow(Skills1_txt, 15, 3000);
-	chassis.turnToHeading(0, 2000);
+	chassis.turnToHeading(0, 1000);
+	pros::delay(1000);
 	chassis.follow(Skills2_txt, 15, 3000, false);
 	pros::delay(500);
 	ExpansionClamp.set_value(true);
-	pros::delay(500);
-	chassis.turnToHeading(90, 2000);
-	chassis.follow(Skills3_txt, 15, 3000);
-	pros::delay(500);
-	chassis.turnToHeading(180, 2000);
-	chassis.follow(Skills4_txt, 15, 3000);
-	pros::delay(500);
-	chassis.turnToHeading(90, 2000);
-	chassis.follow(Skills5_txt, 15, 3000);
-	chassis.turnToHeading(270, 2000);
-	chassis.follow(Skills6_txt, 15, 3000);
-	chassis.turnToHeading(15, 2000);
-	chassis.follow(Skills7_txt, 15, 3000, false);
-	ExpansionClamp.set_value(false);
-	chassis.follow(Skills8_txt, 15, 3000);
-	chassis.turnToHeading(180, 2000);
-	chassis.follow(Skills9_txt, 15, 3000, false);
-	pros::delay(500);
-	ExpansionClamp.set_value(true);
-	pros::delay(500);
-	chassis.turnToHeading(90, 2000);
+	pros::delay(1000);
+	chassis.turnToHeading(90, 1000);
+	pros::delay(1000);
+	chassis.follow(Skills3_txt, 15, 5000);
+	pros::delay(1000);
+	chassis.turnToHeading(180, 1000);
+	pros::delay(1000);
+	chassis.follow(Skills4_txt, 15, 5000);
+	pros::delay(1000);
+	chassis.turnToHeading(90, 1000);
+	pros::delay(1000);
+	chassis.follow(Skills5_txt, 15, 5000);
+	pros::delay(1000);
+	chassis.turnToHeading(270, 1000);
+	pros::delay(1000);
+	chassis.follow(Skills6_txt, 15, 6000);
+	
 	//chassis.follow(Skills10_txt, 15, 3000, false);
 
 	
@@ -425,65 +508,14 @@ void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
 	pros::Task LadyBrownTask{[=] {
-		double Hue;
-		int Pos = LadyBrownRotate.get_position();
-		Color_sensor.set_led_pwm(50);
         while(true)
 		{
-		
-		//LADYBROWN ARM
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
-		{
-			LadyBrownArm(-5010 , 1500); 
-			LadyBrownState = true;
-
+		LadyBrownArm();
 		}
-
-		//LADYBROWN HOLD
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
-		{
-			LadyBrownArm(-14000, 1500); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN SCORE
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
-		{
-			LadyBrownArm(-60000, 1500); 
-			LadyBrownState = false;
-		}
-
-		//LADYBROWN STOW
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
-		{
-			LadyBrownArm(15000, 1500); 
-			LadyBrownState = false;
-		}
-		pros::delay(10);
-		}
-
-		//COLOR SORT BLUE ALLIANCE
-		/*Hue = Color_sensor.get_hue(); 
-		if(Hue < 15.0 and Intake.get_target_velocity() == 300) // and Alliance == true 
-		{
-			pros::c::delay(300);
-			Intake.move_velocity(0);
-			pros::c::delay(1000);
-			Intake.move_velocity(300);
-			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
-		}
-		if(220 < Hue < 260 and Intake.get_target_velocity() == 300 and AllianceBlue == false) 
-		{
-			pros::c::delay(250);
-			//Intake.move_velocity(0);
-			pros::c::delay(250);
-			//Intake.move_velocity(300);
-			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
-		}*/
-
-
     }
 	};
+	//pros::c::task_create(ColorSort, (void*)("") , TASK_STACK_DEPTH_DEFAULT, TASK_STACK_DEPTH_MIN, "ColorSort");
+	pros::Task ColorSortTask(ColorSort);
 	/*
     pros::Task screen_task([&]() {
         while (true) {
@@ -553,8 +585,9 @@ void autonomous()
 	
 	ms::call_selected_auton();
 
-	pros::delay(1000);
+	pros::delay(5000);
 	Intake.move_velocity(0);
+	IntakeConveyor.move_velocity(0);
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
 	printf("done");
@@ -661,8 +694,35 @@ void opcontrol()
 			printf("Expansion state=%d \n", DoinkerState);
 		}
 
+
+		//LADYBROWN CONTROL
+
+		//SCORE
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
+		{
+			position = -60000;
+		}
+
+		//STOW
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
+		{
+			position = 15000;
+		}
+
+		//HOLD
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
+		{
+			position = -14000;
+		}
+
+		//ARM
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
+		{
+			position = 2500;
+		}
+
 		//UNSTUCK CONVEYOR
-		if(IntakeConveyor.get_actual_velocity() < 5 and top_speed == true and LadyBrownState == true)
+		/*if(IntakeConveyor.get_actual_velocity() > 5 and top_speed == true and LadyBrownState == true)
 		{
 			IntakeConveyor.move_velocity(0);
 			top_speed = false;
@@ -673,7 +733,7 @@ void opcontrol()
 		{
 			top_speed = true;
 			printf("top_speed=%d \n", top_speed);
-		}
+		}*/
 		
 		
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());

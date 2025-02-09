@@ -105,9 +105,9 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
 void LadyBrownArm()
 {	
 
-	double kp = 0.8;
-	double ki = 1.0;
-	double kd = -1.0;   /*derivitive should control and stop overshooting this can be done
+	double kp = 3.0;
+	double ki = 0.5;
+	double kd = -5.0;   /*derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
 						*/
 	double P;
@@ -169,7 +169,7 @@ void LadyBrownArm()
 	return;
 }
 
-void ColorSort(void* param)
+void ColorSort()
 {
 	Color_sensor.set_led_pwm(50);
 
@@ -294,13 +294,14 @@ void RED_Right_side_awp() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
-	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
+	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -314,20 +315,20 @@ void RED_Right_side_awp() {
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
 	AllianceBlue = false;
-	AllianceBlue = false;
 	chassis.setPose(-52.311, -58.847, 270);
 	chassis.follow(R1RED_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
-	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
+	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -404,13 +405,14 @@ void BLUE_LEFT_side_awp() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
 	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
-	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
+	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -430,13 +432,14 @@ void BLUE_LEFT_side_elims() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
 	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
-	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
+	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -683,7 +686,7 @@ void opcontrol()
 		}
 
 
-		//LADYBROWN CONTROL
+		//LADYBROWN CONTROLS
 
 		//SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))

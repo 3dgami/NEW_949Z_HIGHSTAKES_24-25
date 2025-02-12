@@ -454,7 +454,7 @@ void BLUE_LEFT_side_elims() {
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
-	chassis.setPose(-58.367, -0.434, 90);
+	chassis.setPose(-58.809, -0.707, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
 	pros::delay(1000);
@@ -466,24 +466,7 @@ void skills() {
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(90, 1000);
-	pros::delay(1000);
-	chassis.follow(Skills3_txt, 15, 5000);
-	pros::delay(1000);
-	chassis.turnToHeading(180, 1000);
-	pros::delay(1000);
-	chassis.follow(Skills4_txt, 15, 5000);
-	pros::delay(1000);
-	chassis.turnToHeading(90, 1000);
-	pros::delay(1000);
-	chassis.follow(Skills5_txt, 15, 5000);
-	pros::delay(1000);
-	chassis.turnToHeading(270, 1000);
-	pros::delay(1000);
-	chassis.follow(Skills6_txt, 15, 6000);
-	
-	//chassis.follow(Skills10_txt, 15, 3000, false);
 
-	
 }
 
 void on_center_button() {}

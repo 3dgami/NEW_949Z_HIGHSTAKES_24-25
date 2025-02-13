@@ -188,7 +188,7 @@ void LadyBrownArm()
 	return;
 }
 
-void ColorSort(void* param)
+void ColorSort()
 {
 	Color_sensor.set_led_pwm(50);
 
@@ -554,7 +554,7 @@ void BLUE_LEFT_side_elims() {
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
-	chassis.setPose(-58.367, -0.434, 90);
+	chassis.setPose(-58.809, -0.707, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
 	pros::delay(1000);
@@ -569,13 +569,15 @@ void skills() {
 	MoveVisionAssisted(5000);
 	chassis.turnToHeading(180, 1000);
 	MoveVisionAssisted(5000);
-	chassis.turnToHeading(95, 1000);
-	chassis.follow(Skills3_txt, 15, 3000);
 	chassis.turnToHeading(90, 1000);
+	chassis.setPose(0, 0, 90);
+	chassis.follow(Skills3_txt, 15, 3000);
 	MoveVisionAssisted(5000);
 	chassis.turnToHeading(270, 1000);
+	chassis.setPose(0, 0, 270);
 	chassis.follow(Skills4_txt, 15, 3000);
 	MoveVisionAssisted(5000);
+
 	
 	//chassis.follow(Skills10_txt, 15, 3000, false);
 
@@ -782,8 +784,8 @@ void opcontrol()
 			printf("Expansion state=%d \n", DoinkerState);
 		}
 
-        //INTAKE LIFT
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
+        //INTAKE LIFT FOR TESTING
+		/*if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
 		{
 			if(IntakeLiftState == true)
 			{
@@ -796,7 +798,7 @@ void opcontrol()
 				IntakeLiftState = true;
 			}
 			printf("Expansion state=%d \n", IntakeLiftState);
-		}
+		}*/
 
 
 		//LADYBROWN CONTROL

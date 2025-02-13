@@ -1,5 +1,7 @@
 #include "main.h"
 //#include "autoSelect/selection.h"
+#include "pros/vision.hpp"
+#include "pros/vision.h"
 #include "Master-Selector/api.hpp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
@@ -11,6 +13,22 @@
 #include "pros/rotation.hpp"
 #include "pros/rtos.h"
 #include "pros/rtos.hpp"
+
+enum Signatures
+
+{
+
+    Blue = 1,
+
+    Red = 2,
+
+};
+
+pros::Vision vision_sensor{15, pros::E_VISION_ZERO_CENTER};
+
+pros::vision_signature_s_t BLUE_SIG = pros::c::vision_signature_from_utility(Signatures::Blue, 8213, 10745, 9479, -989, 87, -451, 3.000, 0);
+
+pros::vision_signature_s_t RED_SIG = pros::c::vision_signature_from_utility(Signatures::Red, -4199, -3455, -3827, 4681, 9059, 3471, 3.000, 0);
 
 
 pros::Controller master{CONTROLLER_MASTER};	
@@ -31,16 +49,17 @@ pros::Rotation LadyBrownRotate(3);
 pros::Optical Color_sensor(19);
 pros::IMU imu(10);
 
-pros::ADIDigitalOut ExpansionClamp('A');
-pros::ADIDigitalOut Doinker('B');
-
 bool ExpansionClampState;
 bool DoinkerState;
+bool IntakeLiftState = false;
 bool LadyBrownState;
 bool AllianceBlue;
 int position = 15000;
 double Hue;
 
+pros::ADIDigitalOut ExpansionClamp('A');
+pros::ADIDigitalOut Doinker('B');
+pros::ADIDigitalOut IntakeLift('H');
 
 // drivetrain settings //UPDATE
 lemlib::Drivetrain drivetrain(&driveL_train, // left motor group
@@ -105,9 +124,9 @@ lemlib::Chassis chassis(drivetrain, // drivetrain settings
 void LadyBrownArm()
 {	
 
-	double kp = 3.0;
-	double ki = 0.5;
-	double kd = -5.0;   /*derivitive should control and stop overshooting this can be done
+	double kp = 1.2;
+	double ki = 1.0;
+	double kd = -1.0;   /*derivitive should control and stop overshooting this can be done
 						  by having kd be negative or having a (P + I - D) for the output PS 
 						*/
 	double P;
@@ -169,7 +188,7 @@ void LadyBrownArm()
 	return;
 }
 
-void ColorSort()
+void ColorSort(void* param)
 {
 	Color_sensor.set_led_pwm(50);
 
@@ -204,15 +223,89 @@ void ColorSort()
 		}
 	}
 }
+
+
+void SetDrive(int Lspeed, int Rspeed)
+{
+
+    left_front.move(Lspeed);
+	
+    left_mid.move(Lspeed);
+
+    left_back.move(Lspeed);
+
+    right_front.move(Rspeed);
+
+    right_mid.move(Rspeed);
+
+    right_back.move(Rspeed);
+
+}
+
+
+void MoveVisionAssisted(int timeOut)
+{	
+
+	int speed;
+	vision_sensor.set_signature(Signatures::Blue, &BLUE_SIG);
+
+    vision_sensor.set_signature(Signatures::Red, &RED_SIG);
+
+    vision_sensor.set_exposure(50);
+	pros::vision_object_s_t obj;
+    while(timeOut > 0)
+	{
+		speed = 45;
+		double offset;
+		SetDrive(speed/2 , speed/2);
+		if (vision_sensor.read_by_size(0, 1, &obj) == 1 && obj.top_coord + obj.height > 0)
+            {
+				// y <= 100
+				// w == 200 - too close, done
+				// x <0 - turn left
+				offset = 1 + 0.5 * abs(obj.x_middle_coord) / obj.width;
+				if(offset > 1.6)
+				{
+					offset = 1.6;
+				}
+		
+				if(obj.x_middle_coord < -5)
+				{
+					SetDrive(speed, speed * offset);
+				} else if(obj.x_middle_coord > 5)
+				{
+					SetDrive(speed * offset, speed);
+				} else {
+					SetDrive(speed, speed);
+				}
+				if(obj.width > 180)
+				{
+					break;
+				}
+
+                // Positive offset means goal is left due to sensor being mounted upside down
+                printf("w:%d  x:%d  y:%d  offset:%f\n", obj.width, obj.x_middle_coord, obj.y_middle_coord, offset);
+
+            }
+		pros::delay(10);
+		timeOut -= 10;
+	}
+	SetDrive(0,0);
+}
+
+
+
 //AUTON//
 
 //RIGHT SIDE AUTON RED AWP
 ASSET(R1RED_txt);
 ASSET(R2RED_txt);
+ASSET(R25RED_txt);
 ASSET(R3RED_txt);
 ASSET(R4RED_txt);
 ASSET(R5RED_txt);
 ASSET(R6RED_txt);
+ASSET(R65RED_txt);
 ASSET(R7RED_txt);
 ASSET(R8RED_txt);
 ASSET(R9RED_txt);
@@ -252,6 +345,8 @@ ASSET(L10RED_txt);
 
 //LEFT SIDE AUTON BLUE AWP
 ASSET(L1BLUE_txt);
+ASSET(L1BLUENEW_txt);
+ASSET(L3BLUENEW_txt);
 ASSET(L2BLUE_txt);
 ASSET(L3BLUE_txt);
 ASSET(L4BLUE_txt);
@@ -294,14 +389,13 @@ void RED_Right_side_awp() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	Intake.move_velocity(600);
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
-	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -315,20 +409,20 @@ void RED_Right_side_awp() {
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
 	AllianceBlue = false;
+	AllianceBlue = false;
 	chassis.setPose(-52.311, -58.847, 270);
 	chassis.follow(R1RED_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	Intake.move_velocity(600);
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
-	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -337,7 +431,7 @@ void RED_Right_side_elims() {
 	pros::delay(1000);
 	Intake.move_velocity(0);
 	chassis.turnToHeading(270, 1000);
-	
+	//chassis.follow(R5RED_txt, 15, 2500);
 }
 
 // Blue Alliance Right Side and gets the auton win point
@@ -405,14 +499,13 @@ void BLUE_LEFT_side_awp() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	Intake.move_velocity(600);
 	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
-	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -421,6 +514,12 @@ void BLUE_LEFT_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(L5BLUE_txt, 15, 2500);
+	//chassis.follow(L6BLUE_txt, 15, 2500, false);
+	//pros::delay(2000);
+	//chassis.turnToHeading(0, 1000);
+	//chassis.follow(L7BLUE_txt, 15, 2500);
+
+
 }
 
 // Blue Alliance Left Side for elimination rounds
@@ -432,14 +531,13 @@ void BLUE_LEFT_side_elims() {
 	ExpansionClamp.set_value(true);
 	pros::delay(750);
 	IntakeConveyor.move_velocity(600);
-	Intake.move_velocity(600);
 	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
-	Intake.move_velocity(-600);
 	pros::delay(1000);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -448,13 +546,15 @@ void BLUE_LEFT_side_elims() {
 	pros::delay(1000);
 	Intake.move_velocity(0);
 	chassis.turnToHeading(90, 1000);
+	
+	//chassis.follow(L5BLUE_txt, 15, 2500);
 }
 
 
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
-	chassis.setPose(-58.809, -0.707, 90);
+	chassis.setPose(-58.367, -0.434, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
 	pros::delay(1000);
@@ -466,7 +566,20 @@ void skills() {
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(90, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(180, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(95, 1000);
+	chassis.follow(Skills3_txt, 15, 3000);
+	chassis.turnToHeading(90, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(270, 1000);
+	chassis.follow(Skills4_txt, 15, 3000);
+	MoveVisionAssisted(5000);
+	
+	//chassis.follow(Skills10_txt, 15, 3000, false);
 
+	
 }
 
 void on_center_button() {}
@@ -489,7 +602,7 @@ void initialize() {
     }
 	};
 	//pros::c::task_create(ColorSort, (void*)("") , TASK_STACK_DEPTH_DEFAULT, TASK_STACK_DEPTH_MIN, "ColorSort");
-	pros::Task ColorSortTask(ColorSort);
+	//pros::Task ColorSortTask(ColorSort);
 	/*
     pros::Task screen_task([&]() {
         while (true) {
@@ -583,6 +696,7 @@ void autonomous()
  */
 
 
+
 void opcontrol()
 {
 	bool IntakeState = false;
@@ -668,8 +782,24 @@ void opcontrol()
 			printf("Expansion state=%d \n", DoinkerState);
 		}
 
+        //INTAKE LIFT
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
+		{
+			if(IntakeLiftState == true)
+			{
+				IntakeLift.set_value(LOW);
+				IntakeLiftState= false;
+			}
+			else
+			{
+				IntakeLift.set_value(HIGH);
+				IntakeLiftState = true;
+			}
+			printf("Expansion state=%d \n", IntakeLiftState);
+		}
 
-		//LADYBROWN CONTROLS
+
+		//LADYBROWN CONTROL
 
 		//SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
@@ -692,7 +822,7 @@ void opcontrol()
 		//ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			position = 2500;
+			position = 1500;
 		}
 
 		//UNSTUCK CONVEYOR

@@ -15,21 +15,14 @@
 #include "pros/rtos.hpp"
 
 enum Signatures
-
 {
-
     Blue = 1,
-
     Red = 2,
-
 };
 
 pros::Vision vision_sensor{15, pros::E_VISION_ZERO_CENTER};
-
-pros::vision_signature_s_t BLUE_SIG = pros::c::vision_signature_from_utility(Signatures::Blue, 8213, 10745, 9479, -989, 87, -451, 3.000, 0);
-
-pros::vision_signature_s_t RED_SIG = pros::c::vision_signature_from_utility(Signatures::Red, -4199, -3455, -3827, 4681, 9059, 3471, 3.000, 0);
-
+pros::vision_signature_s_t BLUE_SIG = pros::c::vision_signature_from_utility(Signatures::Blue, 8213, 10745, 9479, -989, 87, -451, 4.000, 0);
+pros::vision_signature_s_t RED_SIG = pros::c::vision_signature_from_utility(Signatures::Red, -4199, -3455, -3827, 4681, 9059, 3471, 5.000, 0);
 
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(11,pros::E_MOTOR_GEAR_600);
@@ -165,7 +158,7 @@ void LadyBrownArm()
 		D = (lastError - errorTerm) * kd;
 		double output = ((P + D) + (1 * sign));
 
-		printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, Err=%d, rotationPOs=%d \n",output, P, D, Pos, errorTerm, LadyBrownRotate.get_position());
+		// printf("O=%0.2f, P=%0.2f, D=%0.2f, Position=%d, Err=%d, rotationPOs=%d \n",output, P, D, Pos, errorTerm, LadyBrownRotate.get_position());
 
 		LadyBrownRight.move_voltage(-output);
 		LadyBrownLeft.move_voltage(output);
@@ -229,70 +222,73 @@ void SetDrive(int Lspeed, int Rspeed)
 {
 
     left_front.move(Lspeed);
-	
     left_mid.move(Lspeed);
-
     left_back.move(Lspeed);
-
     right_front.move(Rspeed);
-
     right_mid.move(Rspeed);
-
     right_back.move(Rspeed);
-
 }
 
+void InitVisionSensor() {
+	vision_sensor.set_signature(Signatures::Blue, &BLUE_SIG);
+    vision_sensor.set_signature(Signatures::Red, &RED_SIG);
+    vision_sensor.set_exposure(50);
+}
 
 void MoveVisionAssisted(int timeOut)
-{	
-
-	int speed;
-	vision_sensor.set_signature(Signatures::Blue, &BLUE_SIG);
-
-    vision_sensor.set_signature(Signatures::Red, &RED_SIG);
-
-    vision_sensor.set_exposure(50);
+{
+	int maxSize = 0;
 	pros::vision_object_s_t obj;
+
+	int speed = 45;
+
     while(timeOut > 0)
 	{
-		speed = 45;
 		double offset;
-		SetDrive(speed/2 , speed/2);
-		if (vision_sensor.read_by_size(0, 1, &obj) == 1 && obj.top_coord + obj.height > 0)
+		SetDrive(20, 20);
+		if (vision_sensor.read_by_size(0, 1, &obj) == 1 && obj.width > 30)
             {
-				// y <= 100
-				// w == 200 - too close, done
-				// x <0 - turn left
-				offset = 1 + 0.5 * abs(obj.x_middle_coord) / obj.width;
-				if(offset > 1.6)
-				{
-					offset = 1.6;
-				}
-		
-				if(obj.x_middle_coord < -5)
-				{
-					SetDrive(speed, speed * offset);
-				} else if(obj.x_middle_coord > 5)
-				{
-					SetDrive(speed * offset, speed);
-				} else {
-					SetDrive(speed, speed);
-				}
-				if(obj.width > 180)
-				{
+				if (maxSize < obj.width)
+					maxSize = obj.width;
+
+				offset = 1 + abs(obj.x_middle_coord) * 0.003;
+
+				// Positive offset means goal is left due to sensor being mounted upside down
+                printf("w:%d  x:%d  y:%d  offset:%f\n", obj.width, obj.x_middle_coord, obj.y_middle_coord, offset);
+
+				if(obj.width > 290 || obj.y_middle_coord > 55) {
+					printf("Stop\n");
 					break;
 				}
 
-                // Positive offset means goal is left due to sensor being mounted upside down
-                printf("w:%d  x:%d  y:%d  offset:%f\n", obj.width, obj.x_middle_coord, obj.y_middle_coord, offset);
-
-            }
+				if(offset > 1.4)
+				{
+					offset = 1.4;
+				}
+		
+				// x < 0 - turn right
+				if(obj.x_middle_coord > 5)
+				{
+					SetDrive(speed / offset, speed * offset);
+				} else if(obj.x_middle_coord < -5)
+				{
+					SetDrive(speed * offset, speed / offset);
+				} else {
+					SetDrive(speed, speed);
+				}
+            } else {
+				printf(".");
+			}
 		pros::delay(10);
 		timeOut -= 10;
 	}
+
+	// let it drive just bit
+	SetDrive(30, 30);
+	pros::c::delay(200);
+
 	SetDrive(0,0);
 }
-
 
 
 //AUTON//
@@ -554,6 +550,7 @@ void BLUE_LEFT_side_elims() {
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
+	InitVisionSensor();
 	chassis.setPose(-58.809, -0.707, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
@@ -704,6 +701,18 @@ void opcontrol()
 	bool IntakeState = false;
 	bool IntakeREV = false;
 	bool top_speed = false;
+
+	// testing
+	if (false) {
+		IntakeConveyor.move_velocity(600);
+		Intake.move_velocity(-600);
+		InitVisionSensor();
+		MoveVisionAssisted(2500);
+
+		pros::c::delay(2000);
+
+		MoveVisionAssisted(2500);
+	}
 
 	while(true){
 

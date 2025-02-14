@@ -78,7 +78,7 @@ lemlib::ControllerSettings lateral_controller(18, // proportional gain (kP)
 // angular motion controller
 lemlib::ControllerSettings angular_controller(1.5, // proportional gain (kP)
                                              0, // integral gain (kI)
-                                             10, // derivative gain (kD)
+                                             11, // derivative gain (kD)
                                              3, // anti windup
                                              1, // small error range, in degrees
                                              100, // small error range timeout, in milliseconds
@@ -285,7 +285,7 @@ void MoveVisionAssisted(int timeOut)
 
 	// let it drive just bit
 	SetDrive(30, 30);
-	pros::c::delay(200);
+	pros::c::delay(750);
 
 	SetDrive(0,0);
 }
@@ -551,31 +551,50 @@ void BLUE_LEFT_side_elims() {
 void skills() {
 	AllianceBlue = false;
 	InitVisionSensor();
-	chassis.setPose(-58.809, -0.707, 90);
+	chassis.setPose(-57.275, -0.667, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
 	pros::delay(1000);
 	chassis.follow(Skills1_txt, 15, 3000);
+	//chassis.moveToPose(-47.668, -0.36, 90, 2500);
 	chassis.turnToHeading(0, 1000);
 	pros::delay(1000);
-	chassis.follow(Skills2_txt, 15, 3000, false);
-	pros::delay(500);
+	chassis.follow(Skills2_txt, 10, 3000, false);
+	//chassis.moveToPose(-0, -19.0, 0, 2500, {.forwards = false});
+	pros::delay(750);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
+	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	MoveVisionAssisted(5000);
-	chassis.turnToHeading(90, 1000);
+	MoveVisionAssisted(2000);
+	pros::delay(1000);
+	chassis.turnToHeading(90, 2000);
+	pros::delay(1000);
 	chassis.setPose(0, 0, 90);
-	chassis.follow(Skills3_txt, 15, 3000);
+	chassis.moveToPose(30.283, 0.175, 90, 2500);
 	MoveVisionAssisted(5000);
+	pros::delay(2000);
 	chassis.turnToHeading(270, 1000);
+	pros::delay(1000);
 	chassis.setPose(0, 0, 270);
-	chassis.follow(Skills4_txt, 15, 3000);
+	chassis.moveToPose(-50.00, -0.175, 270, 3000);
+	pros::delay(500);
+	chassis.turnToHeading(290, 1000);
 	MoveVisionAssisted(5000);
-
-	
+	MoveVisionAssisted(5000);
+	chassis.setPose(0, 0, 270);
+	chassis.moveToPose(25, 0, 270, 2500, {.forwards = false});
+	pros::delay(500);
+	chassis.turnToHeading(250, 1000);	
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(45, 1000);
+	pros::delay(1000);
+	chassis.setPose(0, 0, 45);
+	chassis.moveToPose(-15, -4, 45, 2500, {.forwards = false});
+	pros::delay(3000);
+	ExpansionClamp.set_value(false);
 	//chassis.follow(Skills10_txt, 15, 3000, false);
 
 	
@@ -704,6 +723,7 @@ void opcontrol()
 
 	// testing
 	if (false) {
+
 		IntakeConveyor.move_velocity(600);
 		Intake.move_velocity(-600);
 		InitVisionSensor();

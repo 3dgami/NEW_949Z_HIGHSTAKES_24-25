@@ -595,9 +595,39 @@ void skills() {
 	chassis.moveToPose(-15, -4, 45, 2500, {.forwards = false});
 	pros::delay(3000);
 	ExpansionClamp.set_value(false);
-	//chassis.follow(Skills10_txt, 15, 3000, false);
+	//Untested
+	chassis.moveToPose(0, 0, 45, 2500);
+	chassis.turnToHeading(180, 1000);
+	chassis.moveToPose(0, 82, 180, 2500, {.forwards = false});
+	pros::delay(3000);
+	ExpansionClamp.set_value(false);
 
-	
+	//after gettign second mogo
+	chassis.turnToHeading(90, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(0, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(45, 1000);
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(45, 1000);
+	pros::delay(1000);
+	chassis.setPose(0, 0, 45);
+	chassis.moveToPose(-23.094, -11.926, 45, 2500, {.forwards = false});
+	chassis.turnToHeading(270, 1000);
+	MoveVisionAssisted(5000);
+	MoveVisionAssisted(5000);
+	chassis.setPose(0, 0, 45);
+	chassis.moveToPose(25, 0, 270, 2500, {.forwards = false});
+	pros::delay(500);
+	chassis.turnToHeading(290, 1000);	
+	MoveVisionAssisted(5000);
+	chassis.turnToHeading(135, 1000);
+	pros::delay(1000);
+	chassis.setPose(0,0,135);
+	chassis.moveToPose(-15, 4, 135, 2500, {.forwards = false});
+	pros::delay(3000);
+	ExpansionClamp.set_value(false);
+
 }
 
 void on_center_button() {}

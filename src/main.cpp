@@ -13,6 +13,7 @@
 #include "pros/rotation.hpp"
 #include "pros/rtos.h"
 #include "pros/rtos.hpp"
+#include <cstdio>
 
 enum Signatures
 {
@@ -34,12 +35,12 @@ pros::Motor left_mid(-13,pros::E_MOTOR_GEAR_600);
 pros::MotorGroup driveL_train({left_front, left_mid, left_back});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({right_front, right_mid, right_back});
 
-pros::Motor IntakeConveyor(18);
-pros::Motor Intake(4);
+pros::Motor IntakeConveyor(18, pros::E_MOTOR_GEAR_600);
+pros::Motor Intake(4, pros::E_MOTOR_GEAR_200);
 pros::Motor LadyBrownLeft(9);
 pros::Motor LadyBrownRight(1);
 pros::Rotation LadyBrownRotate(3);
-pros::Optical Color_sensor(19);
+pros::Optical Color_sensor(16);
 pros::IMU imu(10);
 
 bool ExpansionClampState;
@@ -47,6 +48,8 @@ bool DoinkerState;
 bool IntakeLiftState = false;
 bool LadyBrownState;
 bool AllianceBlue;
+bool top_speed = false;
+bool IntakeState = false;
 int position = 15000;
 double Hue;
 
@@ -182,38 +185,40 @@ void LadyBrownArm()
 }
 
 void ColorSort()
-{
+{	
+	int count;
+	int start_count;
 	Color_sensor.set_led_pwm(50);
 
-	if(AllianceBlue == true)
+	while(true)
 	{
-		while(true)
-		{
-			if(Hue < 15.0 and IntakeConveyor.get_target_velocity() == 600)
+		if(AllianceBlue == true)
+		{	
+			Hue = Color_sensor.get_hue();
+			if(Hue < 15.0) // and IntakeConveyor.get_target_velocity() == 600)
 			{
-			pros::c::delay(250);
+			pros::c::delay(162);
 			IntakeConveyor.move_velocity(0);
-			pros::c::delay(250);
+			pros::c::delay(100);
 			IntakeConveyor.move_velocity(600);
-			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+			//printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 			}
-			pros::delay(5);
+			//printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}
-	}
-	else 
-	{
-		while(true)
+		else 
 		{
-			if(220 < Hue and Hue > 260 and IntakeConveyor.get_target_velocity() == 600) 
+			Hue = Color_sensor.get_hue();
+			if(210 < Hue and Hue < 240) //and IntakeConveyor.get_target_velocity() == 600) 
 			{
-			pros::c::delay(250);
+			pros::c::delay(162);
 			IntakeConveyor.move_velocity(0);
-			pros::c::delay(250);
+			pros::c::delay(100);
 			IntakeConveyor.move_velocity(600);
-			printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
+			//printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 			}
-			pros::delay(5);
+			//printf("Color Hue=%f Current Hue=%f \n", Hue, Color_sensor.get_hue());
 		}
+		pros::delay(5);
 	}
 }
 
@@ -290,6 +295,28 @@ void MoveVisionAssisted(int timeOut)
 	SetDrive(0,0);
 }
 
+void stuck()
+{
+	while(true)
+	{
+		if(top_speed == true and IntakeConveyor.get_actual_velocity() < 5)
+		{
+			IntakeConveyor.move_velocity(-600);
+			pros::delay(500);
+			IntakeConveyor.move_velocity(600);
+			pros::delay(250);
+
+		}
+		if(IntakeConveyor.get_actual_velocity() >= 450)
+		{
+			top_speed = true;
+			printf("top_speed=%d \n", top_speed);
+		}
+		printf("speed%f \n", IntakeConveyor.get_actual_velocity());
+		pros::delay(5);
+		//printf("running \n");
+	}
+}
 
 //AUTON//
 
@@ -383,9 +410,9 @@ void RED_Right_side_awp() {
 	chassis.follow(R1RED_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
-	IntakeConveyor.move_velocity(600);
+	pros::delay(250);
 	chassis.follow(R2RED_txt, 15, 6000);
+	IntakeConveyor.move_velocity(600);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
@@ -398,6 +425,8 @@ void RED_Right_side_awp() {
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(R4RED_txt, 15, 2500);
 	pros::delay(1000);
+	Intake.move_velocity(0);
+	//pros::delay(200);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(R5RED_txt, 15, 2500);
 }
@@ -405,12 +434,11 @@ void RED_Right_side_awp() {
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
 	AllianceBlue = false;
-	AllianceBlue = false;
 	chassis.setPose(-52.311, -58.847, 270);
 	chassis.follow(R1RED_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
+	pros::delay(250);
 	IntakeConveyor.move_velocity(600);
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
@@ -425,6 +453,8 @@ void RED_Right_side_elims() {
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(R4RED_txt, 15, 2500);
 	pros::delay(1000);
+	Intake.move_velocity(0);
+	//pros::delay(200);
 	Intake.move_velocity(0);
 	chassis.turnToHeading(270, 1000);
 	//chassis.follow(R5RED_txt, 15, 2500);
@@ -493,9 +523,10 @@ void BLUE_LEFT_side_awp() {
 	chassis.follow(L1BLUE_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
-	IntakeConveyor.move_velocity(600);
+	pros::delay(250);
+	//IntakeConveyor.move_velocity(600);
 	chassis.follow(L2BLUE_txt, 15, 6000);
+	IntakeConveyor.move_velocity(600);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
@@ -508,6 +539,8 @@ void BLUE_LEFT_side_awp() {
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(L4BLUE_txt, 15, 2500);
 	pros::delay(1000);
+	Intake.move_velocity(0);
+	//pros::delay(200);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(L5BLUE_txt, 15, 2500);
 	//chassis.follow(L6BLUE_txt, 15, 2500, false);
@@ -525,9 +558,9 @@ void BLUE_LEFT_side_elims() {
 	chassis.follow(L1BLUE_txt, 15, 3500, false);
 	pros::delay(2000);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
+	pros::delay(250);
+	chassis.follow(L2BLUE_txt, 15, 10000);
 	IntakeConveyor.move_velocity(600);
-	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
@@ -581,14 +614,15 @@ void skills() {
 	chassis.setPose(0, 0, 270);
 	chassis.moveToPose(-50.00, -0.175, 270, 3000);
 	pros::delay(500);
-	chassis.turnToHeading(290, 1000);
+	chassis.turnToHeading(270, 1000);
 	MoveVisionAssisted(5000);
 	MoveVisionAssisted(5000);
 	chassis.setPose(0, 0, 270);
 	chassis.moveToPose(25, 0, 270, 2500, {.forwards = false});
 	pros::delay(500);
-	chassis.turnToHeading(250, 1000);	
+	chassis.turnToHeading(235, 1000);	
 	MoveVisionAssisted(5000);
+	//chassis.setPose(5, 0, 270);
 	chassis.turnToHeading(45, 1000);
 	pros::delay(1000);
 	chassis.setPose(0, 0, 45);
@@ -598,16 +632,17 @@ void skills() {
 	//Untested
 	chassis.moveToPose(0, 0, 45, 2500);
 	chassis.turnToHeading(180, 1000);
-	chassis.moveToPose(0, 82, 180, 2500, {.forwards = false});
+	chassis.moveToPose(1, 84, 180, 2500, {.forwards = false});
 	pros::delay(3000);
-	ExpansionClamp.set_value(false);
+	ExpansionClamp.set_value(true);
+	pros::delay(1000);
 
 	//after gettign second mogo
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
 	chassis.turnToHeading(0, 1000);
 	MoveVisionAssisted(5000);
-	chassis.turnToHeading(45, 1000);
+	chassis.turnToHeading(65, 1000);
 	MoveVisionAssisted(5000);
 	chassis.turnToHeading(45, 1000);
 	pros::delay(1000);
@@ -641,7 +676,9 @@ void on_center_button() {}
  */
 void initialize() {
     //pros::lcd::initialize(); // initialize brain screen
+	master.set_text(0,5, "Phillipines 4:13");
     chassis.calibrate(); // calibrate sensors
+	Color_sensor.set_led_pwm(50);
 	pros::Task LadyBrownTask{[=] {
         while(true)
 		{
@@ -649,8 +686,18 @@ void initialize() {
 		}
     }
 	};
-	//pros::c::task_create(ColorSort, (void*)("") , TASK_STACK_DEPTH_DEFAULT, TASK_STACK_DEPTH_MIN, "ColorSort");
-	//pros::Task ColorSortTask(ColorSort);
+
+	pros::Task ColorSortTask{[=] {
+        ColorSort();
+    }
+	};
+
+	/*
+	pros::Task Stuck{[=] {
+        stuck();
+    }
+	};
+	*/
 	/*
     pros::Task screen_task([&]() {
         while (true) {
@@ -747,25 +794,12 @@ void autonomous()
 
 void opcontrol()
 {
-	bool IntakeState = false;
 	bool IntakeREV = false;
-	bool top_speed = false;
-
-	// testing
-	if (false) {
-
-		IntakeConveyor.move_velocity(600);
-		Intake.move_velocity(-600);
-		InitVisionSensor();
-		MoveVisionAssisted(2500);
-
-		pros::c::delay(2000);
-
-		MoveVisionAssisted(2500);
-	}
+	bool done = false;
 
 	while(true){
 
+		printf("Alliance=%d", AllianceBlue);
 		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
@@ -883,7 +917,7 @@ void opcontrol()
 		//ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			position = 1500;
+			position = -3000;
 		}
 
 		//UNSTUCK CONVEYOR
@@ -891,16 +925,11 @@ void opcontrol()
 		{
 			IntakeConveyor.move_velocity(0);
 			top_speed = false;
-		}
+		}*/
 
 		//CHECK SPEED
-		if(IntakeConveyor.get_actual_velocity() >= 180 and IntakeState == true)
-		{
-			top_speed = true;
-			printf("top_speed=%d \n", top_speed);
-		}*/
 		
-		
+		printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		//printf("hue=%f \n", Color_sensor.get_hue());
 

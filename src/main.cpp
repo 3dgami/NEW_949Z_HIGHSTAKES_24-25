@@ -644,6 +644,7 @@ void BLUE_LEFT_side_elims() {
 //SKILLS//
 void skills() {
 	AllianceBlue = false;
+	double angle;
 	InitVisionSensor();
 	chassis.setPose(-57.275, -0.667, 90);
 	IntakeConveyor.move_velocity(600);
@@ -702,15 +703,27 @@ void skills() {
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	chassis.setPose(0, 0, 65);
-	chassis.moveToPose(4, 4, 65, 2000);
+	chassis.moveToPose(5, 5, 65, 2000);
 	chassis.turnToHeading(0, 1000);
-	chassis.moveToPose(4, -100, 0, 500, {.forwards = false});
+	chassis.moveToPose(3, -20, 0, 1000, {.forwards = false});
 	pros::delay(2000);
 
 	chassis.setPose(0, 0, 0);
-	chassis.moveToPose(0, 70, 0, 2500);
+	chassis.moveToPose(0, 60, 0, 2500);
+	//chassis.turnToHeading(180, 1000);
+	pros::delay(1000);
+	MoveVisionAssistedToMogo(5000);
+	pros::delay(500);
+
+	//angle = imu.get_heading();
+	chassis.turnToHeading(0, 1000);
+	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
-	chassis.moveToPose(-1, 90, 180, 2500, {.forwards = false});
+	pros::delay(500);
+	//angle = imu.get_heading();
+	chassis.setPose(0, 0, 180);
+
+	chassis.moveToPose(0, 15, 180, 2500, {.forwards = false});
 	pros::delay(2500);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);

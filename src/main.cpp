@@ -608,7 +608,7 @@ void skills() {
 	chassis.setPose(0, 0, 90);
 	chassis.moveToPose(30.283, 0.175, 90, 2500);
 	MoveVisionAssisted(5000);
-	pros::delay(2000);
+	pros::delay(1000);
 	chassis.turnToHeading(270, 1000);
 	pros::delay(1000);
 	chassis.setPose(0, 0, 270);
@@ -622,45 +622,83 @@ void skills() {
 	pros::delay(500);
 	chassis.turnToHeading(235, 1000);	
 	MoveVisionAssisted(5000);
+	pros::delay(500);
+
+	//Remove once fix 6 ring jam issue
+	IntakeConveyor.move_velocity(-600);
+	pros::delay(300);
+	IntakeConveyor.move_velocity(0);
+
+
 	//chassis.setPose(5, 0, 270);
-	chassis.turnToHeading(45, 1000);
+	chassis.turnToHeading(225, 1000);
+	chassis.setPose(0, 0, 225);
+	chassis.moveToPose(5, 5, 225, 2500, {.forwards = false});
+	chassis.turnToHeading(65, 1000);
 	pros::delay(1000);
-	chassis.setPose(0, 0, 45);
-	chassis.moveToPose(-15, -4, 45, 2500, {.forwards = false});
-	pros::delay(3000);
+	chassis.setPose(0, 0, 65);
+	chassis.moveToPose(-19, -11, 65, 2500, {.forwards = false});
+	pros::delay(1500);
 	ExpansionClamp.set_value(false);
-	//Untested
-	chassis.moveToPose(0, 0, 45, 2500);
+	chassis.setPose(0, 0, 65);
+	chassis.moveToPose(4, 4, 65, 2000);
+	chassis.turnToHeading(0, 1000);
+	chassis.moveToPose(4, -100, 0, 500, {.forwards = false});
+	pros::delay(2000);
+
+	chassis.setPose(0, 0, 0);
+	chassis.moveToPose(0, 70, 0, 2500);
 	chassis.turnToHeading(180, 1000);
-	chassis.moveToPose(1, 84, 180, 2500, {.forwards = false});
-	pros::delay(3000);
+	chassis.moveToPose(-1, 90, 180, 2500, {.forwards = false});
+	pros::delay(2500);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
+	IntakeConveyor.move_velocity(600);
 
 	//after gettign second mogo
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
-	chassis.turnToHeading(0, 1000);
-	MoveVisionAssisted(5000);
-	chassis.turnToHeading(65, 1000);
-	MoveVisionAssisted(5000);
-	chassis.turnToHeading(45, 1000);
 	pros::delay(1000);
-	chassis.setPose(0, 0, 45);
-	chassis.moveToPose(-23.094, -11.926, 45, 2500, {.forwards = false});
+	chassis.turnToHeading(0, 1000);
+	MoveVisionAssisted(2000);
+	pros::delay(1000);
+	chassis.turnToHeading(90, 2000);
+	pros::delay(1000);
+	chassis.setPose(0, 0, 90);
+	chassis.moveToPose(30.283, 0.175, 90, 2500);
+	MoveVisionAssisted(5000);
+	pros::delay(1000);
+	chassis.turnToHeading(270, 1000);
+	pros::delay(1000);
+	chassis.setPose(0, 0, 270);
+	chassis.moveToPose(-50.00, -0.175, 270, 3000);
+	pros::delay(500);
 	chassis.turnToHeading(270, 1000);
 	MoveVisionAssisted(5000);
 	MoveVisionAssisted(5000);
-	chassis.setPose(0, 0, 45);
+	chassis.setPose(0, 0, 270);
 	chassis.moveToPose(25, 0, 270, 2500, {.forwards = false});
 	pros::delay(500);
-	chassis.turnToHeading(290, 1000);	
+	chassis.turnToHeading(305, 1000);	
 	MoveVisionAssisted(5000);
-	chassis.turnToHeading(135, 1000);
 	pros::delay(1000);
-	chassis.setPose(0,0,135);
-	chassis.moveToPose(-15, 4, 135, 2500, {.forwards = false});
-	pros::delay(3000);
+
+
+	//Remove once fix 6 ring jam issue
+	IntakeConveyor.move_velocity(-600);
+	pros::delay(300);
+	IntakeConveyor.move_velocity(0);
+
+
+	//chassis.setPose(5, 0, 270);
+	chassis.turnToHeading(315, 1000);
+	chassis.setPose(0, 0, 315);
+	chassis.moveToPose(5, -5, 315, 2500, {.forwards = false});
+	chassis.turnToHeading(115, 1000);
+	pros::delay(1000);
+	chassis.setPose(0, 0, 115);
+	chassis.moveToPose(-19, 11, 65, 2500, {.forwards = false});
+	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 
 }

@@ -17,13 +17,18 @@
 
 enum Signatures
 {
-    Blue = 1,
+	First = 1,
+    Blue = First,
     Red = 2,
+	Yellow = 3,
+	Empty = 4,
 };
 
 pros::Vision vision_sensor{15, pros::E_VISION_ZERO_CENTER};
 pros::vision_signature_s_t BLUE_SIG = pros::c::vision_signature_from_utility(Signatures::Blue, 8213, 10745, 9479, -989, 87, -451, 4.000, 0);
 pros::vision_signature_s_t RED_SIG = pros::c::vision_signature_from_utility(Signatures::Red, -4199, -3455, -3827, 4681, 9059, 3471, 5.000, 0);
+pros::vision_signature_s_t YELLOW_SIG = pros::c::vision_signature_from_utility(Signatures::Yellow, -2239, -1723, -1980, -5487, -4611, -5048, 6.00, 0);
+pros::vision_signature_s_t YELLOW_EMPTY = pros::c::vision_signature_from_utility(Signatures::Empty, 8213, 10745, 9479, -989, 87, -451, 0.1, 0);
 
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(11,pros::E_MOTOR_GEAR_600);
@@ -293,6 +298,62 @@ void MoveVisionAssisted(int timeOut)
 	pros::c::delay(750);
 
 	SetDrive(0,0);
+}
+
+void MoveVisionAssistedToMogo(int timeOut)
+{
+	int maxSize = 0;
+	pros::vision_object_s_t obj;
+
+	vision_sensor.set_signature(Signatures::First, &YELLOW_SIG);
+	vision_sensor.set_signature(Signatures::First + 1, &YELLOW_EMPTY);
+	vision_sensor.set_exposure(20);
+
+	int speed = 30;
+
+	SetDrive(20, 20);
+    while(timeOut > 0)
+	{
+		double offset;
+		if (vision_sensor.read_by_size(0, 1, &obj) == 1 && obj.width > 30)
+            {
+				if (maxSize < obj.width)
+					maxSize = obj.width;
+
+				offset = 1 + abs(obj.x_middle_coord) * 0.005;
+
+				// Positive offset means goal is left due to sensor being mounted upside down
+                printf("w:%d  x:%d  y:%d  offset:%f\n", obj.width, obj.x_middle_coord, obj.y_middle_coord, offset);
+
+				if(obj.width > 220 || obj.y_middle_coord > -50) {
+					printf("Stop\n");
+					break;
+				}
+
+				if(offset > 1.4)
+				{
+					offset = 1.4;
+				}
+		
+				// x < 0 - turn right
+				if(obj.x_middle_coord > 5)
+				{
+					SetDrive(speed / offset, speed * offset);
+				} else if(obj.x_middle_coord < -5)
+				{
+					SetDrive(speed * offset, speed / offset);
+				} else {
+					SetDrive(speed, speed);
+				}
+            } else {
+				printf(".");
+			}
+		pros::delay(10);
+		timeOut -= 10;
+	}
+
+	SetDrive(0,0);
+	InitVisionSensor();
 }
 
 void stuck()
@@ -835,9 +896,14 @@ void opcontrol()
 	bool IntakeREV = false;
 	bool done = false;
 
+	if (false) {
+		InitVisionSensor();
+		MoveVisionAssistedToMogo(5000);
+	}
+
 	while(true){
 
-		printf("Alliance=%d", AllianceBlue);
+		// printf("Alliance=%d", AllianceBlue);
 		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
@@ -967,7 +1033,7 @@ void opcontrol()
 
 		//CHECK SPEED
 		
-		printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
+		// printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		//printf("hue=%f \n", Color_sensor.get_hue());
 

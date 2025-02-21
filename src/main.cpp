@@ -651,11 +651,9 @@ void skills() {
 	Intake.move_velocity(-600);
 	pros::delay(1000);
 	chassis.follow(Skills1_txt, 15, 3000);
-	//chassis.moveToPose(-47.668, -0.36, 90, 2500);
 	chassis.turnToHeading(0, 1000);
 	pros::delay(1000);
 	chassis.follow(Skills2_txt, 10, 3000, false);
-	//chassis.moveToPose(-0, -19.0, 0, 2500, {.forwards = false});
 	pros::delay(750);
 	ExpansionClamp.set_value(true);
 	pros::delay(1000);
@@ -679,6 +677,11 @@ void skills() {
 	chassis.turnToHeading(270, 1000);
 	MoveVisionAssisted(5000);
 	MoveVisionAssisted(5000);
+
+	pros::delay(1000);
+	chassis.turnToHeading(270, 1000);
+	pros::delay(1000);
+
 	chassis.setPose(0, 0, 270);
 	chassis.moveToPose(25, 0, 270, 2500, {.forwards = false});
 	pros::delay(500);
@@ -693,20 +696,35 @@ void skills() {
 
 
 	//chassis.setPose(5, 0, 270);
+	pros::delay(1000);
 	chassis.turnToHeading(225, 1000);
+	pros::delay(1000);
+
 	chassis.setPose(0, 0, 225);
 	chassis.moveToPose(5, 5, 225, 2500, {.forwards = false});
+
+	pros::delay(1000);
 	chassis.turnToHeading(65, 1000);
 	pros::delay(1000);
+
 	chassis.setPose(0, 0, 65);
 	chassis.moveToPose(-19, -11, 65, 2500, {.forwards = false});
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
+
+	pros::delay(500);
+	chassis.turnToHeading(65, 1000);
+	pros::delay(1000);
+
 	chassis.setPose(0, 0, 65);
 	chassis.moveToPose(5, 5, 65, 2000);
 	chassis.turnToHeading(0, 1000);
 	chassis.moveToPose(3, -20, 0, 1000, {.forwards = false});
 	pros::delay(2000);
+
+	pros::delay(500);
+	chassis.turnToHeading(0, 1000);
+	pros::delay(1000);
 
 	chassis.setPose(0, 0, 0);
 	chassis.moveToPose(0, 60, 0, 2500);

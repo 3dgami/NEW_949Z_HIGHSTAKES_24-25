@@ -44,8 +44,8 @@ pros::Motor IntakeConveyor(18, pros::E_MOTOR_GEAR_600);
 pros::Motor Intake(4, pros::E_MOTOR_GEAR_200);
 pros::Motor LadyBrownLeft(9);
 pros::Motor LadyBrownRight(1);
-pros::Rotation LadyBrownRotate(3);
-pros::Optical Color_sensor(16);
+pros::Rotation LadyBrownRotate(16);
+pros::Optical Color_sensor(3);
 pros::IMU imu(10);
 
 bool ExpansionClampState;
@@ -202,7 +202,7 @@ void ColorSort()
 			Hue = Color_sensor.get_hue();
 			if(Hue < 15.0) // and IntakeConveyor.get_target_velocity() == 600)
 			{
-			pros::c::delay(162);
+			pros::c::delay(120);
 			IntakeConveyor.move_velocity(0);
 			pros::c::delay(100);
 			IntakeConveyor.move_velocity(600);
@@ -215,7 +215,7 @@ void ColorSort()
 			Hue = Color_sensor.get_hue();
 			if(210 < Hue and Hue < 240) //and IntakeConveyor.get_target_velocity() == 600) 
 			{
-			pros::c::delay(162);
+			pros::c::delay(120);
 			IntakeConveyor.move_velocity(0);
 			pros::c::delay(100);
 			IntakeConveyor.move_velocity(600);
@@ -485,7 +485,7 @@ void RED_Right_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(R4RED_txt, 15, 2500);
-	pros::delay(1000);
+	pros::delay(1500);
 	Intake.move_velocity(0);
 	//pros::delay(200);
 	chassis.turnToHeading(0, 1000);
@@ -652,19 +652,19 @@ void skills() {
 	pros::delay(1000);
 	chassis.follow(Skills1_txt, 15, 3000);
 	chassis.turnToHeading(0, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.follow(Skills2_txt, 10, 3000, false);
 	pros::delay(750);
 	ExpansionClamp.set_value(true);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(180, 1000);
 	MoveVisionAssisted(2000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(90, 2000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.setPose(0, 0, 90);
 	chassis.moveToPose(30.283, 0.175, 90, 2500);
 	MoveVisionAssisted(5000);
@@ -696,16 +696,16 @@ void skills() {
 
 
 	//chassis.setPose(5, 0, 270);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(225, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 
 	chassis.setPose(0, 0, 225);
 	chassis.moveToPose(5, 5, 225, 2500, {.forwards = false});
 
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(65, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 
 	chassis.setPose(0, 0, 65);
 	chassis.moveToPose(-19, -11, 65, 2500, {.forwards = false});
@@ -714,54 +714,55 @@ void skills() {
 
 	pros::delay(500);
 	chassis.turnToHeading(65, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 
 	chassis.setPose(0, 0, 65);
-	chassis.moveToPose(5, 5, 65, 2000);
+	chassis.moveToPose(6, 6, 65, 2000);
 	chassis.turnToHeading(0, 1000);
 	chassis.moveToPose(3, -20, 0, 1000, {.forwards = false});
 	pros::delay(2000);
 
 	pros::delay(500);
 	chassis.turnToHeading(0, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 
 	chassis.setPose(0, 0, 0);
 	chassis.moveToPose(0, 60, 0, 2500);
 	//chassis.turnToHeading(180, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 	MoveVisionAssistedToMogo(5000);
 	pros::delay(500);
 
-	//angle = imu.get_heading();
-	chassis.turnToHeading(0, 1000);
+	angle = imu.get_rotation() - 90;
+
+	//chassis.turnToHeading(0, 1000);
 	pros::delay(1000);
-	chassis.turnToHeading(180, 1000);
+	chassis.turnToHeading(180 + angle, 1000);
 	pros::delay(500);
 	//angle = imu.get_heading();
-	chassis.setPose(0, 0, 180);
+	chassis.setPose(0, 0, 180 + angle);
 
-	chassis.moveToPose(0, 15, 180, 2500, {.forwards = false});
+	chassis.moveToPose(0, 15, 180 + angle, 2500, {.forwards = false});
 	pros::delay(2500);
 	ExpansionClamp.set_value(true);
-	pros::delay(1000);
+	pros::delay(500);
 	IntakeConveyor.move_velocity(600);
 
 	//after gettign second mogo
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(0, 1000);
 	MoveVisionAssisted(2000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(90, 2000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.setPose(0, 0, 90);
 	chassis.moveToPose(30.283, 0.175, 90, 2500);
 	MoveVisionAssisted(5000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.turnToHeading(270, 1000);
-	pros::delay(1000);
+	pros::delay(500);
 	chassis.setPose(0, 0, 270);
 	chassis.moveToPose(-50.00, -0.175, 270, 3000);
 	pros::delay(500);
@@ -773,7 +774,7 @@ void skills() {
 	pros::delay(500);
 	chassis.turnToHeading(305, 1000);	
 	MoveVisionAssisted(5000);
-	pros::delay(1000);
+	pros::delay(500);
 
 
 	//Remove once fix 6 ring jam issue
@@ -928,8 +929,7 @@ void opcontrol()
 	bool done = false;
 
 	if (false) {
-		InitVisionSensor();
-		MoveVisionAssistedToMogo(5000);
+		AllianceBlue = true;
 	}
 
 	while(true){
@@ -1040,19 +1040,19 @@ void opcontrol()
 		//STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			position = 15000;
+			position = 18000;
 		}
 
 		//HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			position = -14000;
+			position = -12000;
 		}
 
 		//ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			position = -3000;
+			position = 3500;
 		}
 
 		//UNSTUCK CONVEYOR
@@ -1066,7 +1066,7 @@ void opcontrol()
 		
 		// printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
-		//printf("hue=%f \n", Color_sensor.get_hue());
+		printf("angle=%f \n", imu.get_rotation());
 
 		pros::delay(10);
 	};

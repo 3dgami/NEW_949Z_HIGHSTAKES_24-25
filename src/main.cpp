@@ -1,5 +1,6 @@
 #include "main.h"
 //#include "autoSelect/selection.h"
+#include "Master-Selector/selector.hpp"
 #include "pros/vision.hpp"
 #include "pros/vision.h"
 #include "Master-Selector/api.hpp"
@@ -48,6 +49,11 @@ pros::Rotation LadyBrownRotate(16);
 pros::Optical Color_sensor(3);
 pros::IMU imu(10);
 
+pros::Rotation horizontal_encoder(9);
+lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_325, -1.875);
+// 1.875
+pros::ADIEncoder vertical_encoder('C', 'D', true);
+lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, 8);
 bool ExpansionClampState;
 bool DoinkerState;
 bool IntakeLiftState = false;
@@ -65,7 +71,7 @@ pros::ADIDigitalOut IntakeLift('H');
 // drivetrain settings //UPDATE
 lemlib::Drivetrain drivetrain(&driveL_train, // left motor group
                               &driveR_train, // right motor group
-                              13, // 13 inch track width
+                              10.5, // 10.5 inch track width
                               lemlib::Omniwheel::NEW_275, // using new 2,75" omnis
                               450, // drivetrain rpm is 450
                               2 // horizontal drift is 2. If we had traction wheels, it would have been 8
@@ -96,9 +102,9 @@ lemlib::ControllerSettings angular_controller(1.5, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(nullptr, //&vertical_tracking_wheel, // vertical tracking wheel
+lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
-                            nullptr, // horizontal tracking wheel
+                            &horizontal_tracking_wheel,// horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
                             &imu // inertial sensor
 );
@@ -646,16 +652,16 @@ void skills() {
 	AllianceBlue = false;
 	double angle;
 	InitVisionSensor();
-	chassis.setPose(-57.275, -0.667, 90);
+	chassis.setPose(-58.5, 0, 90);
 	IntakeConveyor.move_velocity(600);
 	Intake.move_velocity(-600);
 	pros::delay(1000);
 	chassis.follow(Skills1_txt, 15, 3000);
+	chassis.waitUntilDone();
 	chassis.turnToHeading(0, 1000);
-	pros::delay(500);
+	chassis.waitUntilDone();
 	chassis.follow(Skills2_txt, 10, 3000, false);
-	pros::delay(750);
-	ExpansionClamp.set_value(true);
+	/*ExpansionClamp.set_value(true);
 	pros::delay(500);
 	chassis.turnToHeading(90, 1000);
 	MoveVisionAssisted(5000);
@@ -792,7 +798,7 @@ void skills() {
 	chassis.setPose(0, 0, 115);
 	chassis.moveToPose(-19, 11, 65, 2500, {.forwards = false});
 	pros::delay(1500);
-	ExpansionClamp.set_value(false);
+	ExpansionClamp.set_value(false);*/
 
 }
 
@@ -806,7 +812,7 @@ void on_center_button() {}
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-    //pros::lcd::initialize(); // initialize brain screen
+    pros::lcd::initialize(); // initialize brain screen
 	master.set_text(0,5, "Phillipines 4:13");
     chassis.calibrate(); // calibrate sensors
 	Color_sensor.set_led_pwm(50);
@@ -829,7 +835,7 @@ void initialize() {
     }
 	};
 	*/
-	/*
+	
     pros::Task screen_task([&]() {
         while (true) {
             // print robot location to the brain screen
@@ -837,9 +843,11 @@ void initialize() {
             pros::lcd::print(1, "Y: %f", chassis.getPose().y); // y
             pros::lcd::print(2, "Theta: %f", chassis.getPose().theta); // heading
             // delay to save resources
+			//pros::lcd::print(1, "Rotation Sensor: %i", horizontal_encoder.get_position());
+			//pros::lcd::print(2, "ADI Vertical: %i", vertical_encoder.get_value());
             pros::delay(20);
         }
-    });*/
+    });
 }
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -878,7 +886,7 @@ void competition_initialize()
             ms::Auton("Skills", skills)
         })
     });
-    ms::initialize(); // Initialize the screen
+	ms::initialize(); // Initialize the screen
 
 }
 
@@ -904,6 +912,9 @@ void autonomous()
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
 	printf("done");
+	//chassis.setPose(0, 0, 0);
+    // move 48" forwards
+    //chassis.moveToPoint(0, 48, 10000);
 	
 }
 
@@ -934,7 +945,6 @@ void opcontrol()
 
 	while(true){
 
-		// printf("Alliance=%d", AllianceBlue);
 		int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
@@ -1054,16 +1064,8 @@ void opcontrol()
 		{
 			position = 3500;
 		}
-
-		//UNSTUCK CONVEYOR
-		/*if(IntakeConveyor.get_actual_velocity() > 5 and top_speed == true and LadyBrownState == true)
-		{
-			IntakeConveyor.move_velocity(0);
-			top_speed = false;
-		}*/
-
-		//CHECK SPEED
 		
+		// printf("Alliance=%d", AllianceBlue);
 		// printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
 		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		printf("angle=%f \n", imu.get_rotation());

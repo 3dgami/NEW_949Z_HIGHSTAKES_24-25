@@ -42,18 +42,13 @@ pros::MotorGroup driveL_train({left_front, left_mid, left_back});//UPDATE WITH M
 pros::MotorGroup driveR_train({right_front, right_mid, right_back});
 
 pros::Motor IntakeConveyor(18, pros::E_MOTOR_GEAR_600);
-pros::Motor Intake(4, pros::E_MOTOR_GEAR_200);
-pros::Motor LadyBrownLeft(9);
+pros::Motor Intake(-9);
+pros::Motor LadyBrownLeft(90);
 pros::Motor LadyBrownRight(1);
 pros::Rotation LadyBrownRotate(16);
 pros::Optical Color_sensor(3);
 pros::IMU imu(10);
 
-pros::Rotation horizontal_encoder(9);
-lemlib::TrackingWheel horizontal_tracking_wheel(&horizontal_encoder, lemlib::Omniwheel::NEW_325, -1.875);
-// 1.875
-pros::ADIEncoder vertical_encoder('C', 'D', true);
-lemlib::TrackingWheel vertical_tracking_wheel(&vertical_encoder, lemlib::Omniwheel::NEW_275, 8);
 bool ExpansionClampState;
 bool DoinkerState;
 bool IntakeLiftState = false;
@@ -102,9 +97,9 @@ lemlib::ControllerSettings angular_controller(1.5, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
-                            &horizontal_tracking_wheel,// horizontal tracking wheel
+                            nullptr,// horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
                             &imu // inertial sensor
 );
@@ -559,22 +554,19 @@ void BLUE_Right_side_elims() {
 // RED Alliance Left Side
 void RED_LEFT_side_awp() {
 	AllianceBlue = false;
-	chassis.setPose(-51.863, 23.217, 270);
+	chassis.setPose(-50.011, 23.602, 270);
 	chassis.follow(L1RED_txt, 15, 2000, false);
-	pros::delay(750);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
-	Intake.move_velocity(200);
-	pros::delay(750);
-	chassis.turnToHeading(0, 1500);
-	chassis.follow(L2RED_txt, 15, 2000);
-	pros::delay(750);
-	//chassis.turnToHeading(300, 1500);
-	chassis.turnToHeading(85, 1500);
-	chassis.follow(L3RED_txt, 15, 2000);
-	chassis.follow(L4RED_txt, 15, 2000, false);
-	chassis.turnToHeading(180, 1500);
-	chassis.follow(L5RED_txt, 15, 2000);
+	pros::delay(250);
+	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
+	pros::delay(250);
+	chassis.turnToHeading(50, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(L2RED_txt, 15, 2000, true);
+	
 
 
 }
@@ -585,35 +577,36 @@ void RED_LEFT_side_elims() {
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
+	IntakeConveyor.move_velocity(0);
+	Intake.move_velocity(0);
 	AllianceBlue = true;
-	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUE_txt, 15, 3500, false);
-	pros::delay(2000);
+	chassis.setPose(49.934, -57.707, 90);
+	chassis.follow(L1BLUE_txt, 15, 5000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
 	pros::delay(250);
-	//IntakeConveyor.move_velocity(600);
-	chassis.follow(L2BLUE_txt, 15, 6000);
 	IntakeConveyor.move_velocity(600);
+
+	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
-	pros::delay(1000);
+	chassis.waitUntilDone();
 	ExpansionClamp.set_value(true);
+	Intake.move_velocity(600);
+
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(L4BLUE_txt, 15, 2500);
 	pros::delay(1000);
-	Intake.move_velocity(0);
 	//pros::delay(200);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(L5BLUE_txt, 15, 2500);
-	//chassis.follow(L6BLUE_txt, 15, 2500, false);
-	//pros::delay(2000);
-	//chassis.turnToHeading(0, 1000);
-	//chassis.follow(L7BLUE_txt, 15, 2500);
 
 
 }
@@ -815,6 +808,7 @@ void initialize() {
     pros::lcd::initialize(); // initialize brain screen
 	master.set_text(0,5, "Phillipines 4:13");
     chassis.calibrate(); // calibrate sensors
+	//chassis.setPose(-50.011, 23.602, 90);
 	Color_sensor.set_led_pwm(50);
 	pros::Task LadyBrownTask{[=] {
         while(true)
@@ -828,13 +822,6 @@ void initialize() {
         ColorSort();
     }
 	};
-
-	/*
-	pros::Task Stuck{[=] {
-        stuck();
-    }
-	};
-	*/
 	
     pros::Task screen_task([&]() {
         while (true) {
@@ -912,9 +899,6 @@ void autonomous()
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
 	printf("done");
-	//chassis.setPose(0, 0, 0);
-    // move 48" forwards
-    //chassis.moveToPoint(0, 48, 10000);
 	
 }
 
@@ -962,7 +946,7 @@ void opcontrol()
 			}
 			else
 			{
-				Intake.move_velocity(-600);
+				Intake.move_velocity(600);
 				IntakeConveyor.move_velocity(600);
 				IntakeState = true;
 			}
@@ -981,7 +965,7 @@ void opcontrol()
 			else
 			{
 				IntakeConveyor.move_velocity(-600);
-				Intake.move_velocity(600);
+				Intake.move_velocity(-600);
 				IntakeREV = true;
 			}
 			top_speed = false;

@@ -567,7 +567,7 @@ void RED_LEFT_side_awp() {
 	chassis.waitUntilDone();
 	chassis.follow(L2RED_txt, 15, 2000, true);
 	chassis.waitUntilDone();
-	chassis.turnToHeading(0, 2000);
+	chassis.turnToHeading(0, 1000);
 	chassis.waitUntilDone();
 	chassis.follow(L3RED_txt, 15, 2000, true);
 	chassis.waitUntilDone();
@@ -579,7 +579,7 @@ void RED_LEFT_side_awp() {
 	chassis.waitUntilDone();
 	chassis.turnToHeading(180, 2000);
 	chassis.waitUntilDone();
-	chassis.follow(L5RED_txt, 15, 2000, true);
+	chassis.follow(L6RED_txt, 15, 2000, true);
 	
 
 
@@ -595,6 +595,7 @@ void BLUE_LEFT_side_awp() {
 	Intake.move_velocity(0);
 	AllianceBlue = true;
 	chassis.setPose(49.934, -57.707, 90);
+	IntakeConveyor.move_velocity(0);
 	chassis.follow(L1BLUE_txt, 15, 5000, false);
 	chassis.waitUntilDone();
 	pros::delay(100);

@@ -468,27 +468,34 @@ ASSET(Skills11_txt);
 // RED Alliance Right Side and gets the auton win point
 void RED_Right_side_awp() {
 	AllianceBlue = false;
-	chassis.setPose(-52.311, -58.847, 270);
-	chassis.follow(R1RED_txt, 15, 3500, false);
-	pros::delay(2000);
+	IntakeConveyor.move_velocity(0);
+	Intake.move_velocity(0);
+	AllianceBlue = true;
+	chassis.setPose(-49.934, -57.707, 270);
+	IntakeConveyor.move_velocity(0);
+	chassis.follow(R1RED_txt, 15, 5000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
 	pros::delay(250);
-	chassis.follow(R2RED_txt, 15, 6000);
 	IntakeConveyor.move_velocity(600);
+
+	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
-	pros::delay(1000);
+	chassis.waitUntilDone();
 	ExpansionClamp.set_value(true);
+	Intake.move_velocity(600);
+
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(R4RED_txt, 15, 2500);
-	pros::delay(1500);
-	Intake.move_velocity(0);
-	//pros::delay(200);
+	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(R5RED_txt, 15, 2500);
 }
@@ -496,55 +503,99 @@ void RED_Right_side_awp() {
 // RED Alliance Right Side for elimination rounds
 void RED_Right_side_elims() {
 	AllianceBlue = false;
-	chassis.setPose(-52.311, -58.847, 270);
-	chassis.follow(R1RED_txt, 15, 3500, false);
-	pros::delay(2000);
+	IntakeConveyor.move_velocity(0);
+	Intake.move_velocity(0);
+	AllianceBlue = true;
+	chassis.setPose(-49.934, -57.707, 270);
+	IntakeConveyor.move_velocity(0);
+	chassis.follow(R1RED_txt, 15, 5000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
 	pros::delay(250);
 	IntakeConveyor.move_velocity(600);
+
 	chassis.follow(R2RED_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(270, 1000);
 	chassis.follow(R3RED_txt, 15, 2500, false);
-	pros::delay(1000);
+	chassis.waitUntilDone();
 	ExpansionClamp.set_value(true);
+	Intake.move_velocity(600);
+
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(R4RED_txt, 15, 2500);
 	pros::delay(1000);
-	Intake.move_velocity(0);
-	//pros::delay(200);
-	Intake.move_velocity(0);
-	chassis.turnToHeading(270, 1000);
-	//chassis.follow(R5RED_txt, 15, 2500);
+	chassis.turnToHeading(90, 1000);
+	
 }
 
 // Blue Alliance Right Side and gets the auton win point
 void BLUE_Right_side_awp() {
 	AllianceBlue = true;
-	chassis.setPose(51.863, 23.217, 90);
+	chassis.setPose(50.011, 23.602, 90);
 	chassis.follow(R1BLUE_txt, 15, 2000, false);
-	pros::delay(750);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
-	pros::delay(750);
-	Intake.move_velocity(200);
-	pros::delay(750);
-	chassis.turnToHeading(0, 1500);
-	chassis.follow(R2BLUE_txt, 15, 2000);
-	pros::delay(750);
-	chassis.turnToHeading(275, 1500);
-	chassis.follow(R3BLUE_txt, 15, 2000);
-	chassis.follow(R4BLUE_txt, 15, 2000, false);
-	chassis.turnToHeading(180, 1500);
-	chassis.follow(R5BLUE_txt, 15, 2000);
+	pros::delay(250);
+	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
+	pros::delay(250);
+	chassis.turnToHeading(315, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R2BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 1000);
+	chassis.waitUntilDone();
+	chassis.follow(R3BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.follow(R4BLUE_txt, 15, 3000, false);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R5BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(180, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R6BLUE_txt, 15, 2000, true);
 }
 
 // Blue Alliance Right Side elimination rounds
 void BLUE_Right_side_elims() {
 	AllianceBlue = true;
+	chassis.setPose(50.011, 23.602, 90);
+	chassis.follow(R1BLUE_txt, 15, 2000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
+	ExpansionClamp.set_value(true);
+	pros::delay(250);
+	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
+	pros::delay(250);
+	chassis.turnToHeading(315, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R2BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 1000);
+	chassis.waitUntilDone();
+	chassis.follow(R3BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.follow(R4BLUE_txt, 15, 3000, false);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R5BLUE_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(165, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(R7BLUE_txt, 15, 2000, true);
+
 }
 
 
@@ -588,9 +639,36 @@ void RED_LEFT_side_awp() {
 // RED Alliance Left Side elimination rounds
 void RED_LEFT_side_elims() {
 	AllianceBlue = false;
+	chassis.setPose(-50.011, 23.602, 270);
+	chassis.follow(L1RED_txt, 15, 2000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
+	ExpansionClamp.set_value(true);
+	pros::delay(250);
+	IntakeConveyor.move_velocity(600);
+	Intake.move_velocity(600);
+	pros::delay(250);
+	chassis.turnToHeading(45, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(L2RED_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 1000);
+	chassis.waitUntilDone();
+	chassis.follow(L3RED_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.follow(L4RED_txt, 15, 3000, false);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(0, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(L5RED_txt, 15, 2000, true);
+	chassis.waitUntilDone();
+	chassis.turnToHeading(195, 2000);
+	chassis.waitUntilDone();
+	chassis.follow(L7RED_txt, 15, 2000, true);
 }
 // Blue Alliance Left Side and gets the auton win point
 void BLUE_LEFT_side_awp() {
+	AllianceBlue = true;
 	IntakeConveyor.move_velocity(0);
 	Intake.move_velocity(0);
 	AllianceBlue = true;
@@ -628,29 +706,35 @@ void BLUE_LEFT_side_awp() {
 // Blue Alliance Left Side for elimination rounds
 void BLUE_LEFT_side_elims() {
 	AllianceBlue = true;
-	chassis.setPose(52.311, -58.847, 90);
-	chassis.follow(L1BLUE_txt, 15, 3500, false);
-	pros::delay(2000);
+	IntakeConveyor.move_velocity(0);
+	Intake.move_velocity(0);
+	AllianceBlue = true;
+	chassis.setPose(49.934, -57.707, 90);
+	IntakeConveyor.move_velocity(0);
+	chassis.follow(L1BLUE_txt, 15, 5000, false);
+	chassis.waitUntilDone();
+	pros::delay(100);
 	ExpansionClamp.set_value(true);
 	pros::delay(250);
-	chassis.follow(L2BLUE_txt, 15, 10000);
 	IntakeConveyor.move_velocity(600);
+
+	chassis.follow(L2BLUE_txt, 15, 6000);
 	pros::delay(1500);
 	ExpansionClamp.set_value(false);
 	pros::delay(500);
+
 	Intake.move_velocity(-600);
 	chassis.turnToHeading(90, 1000);
 	chassis.follow(L3BLUE_txt, 15, 2500, false);
-	pros::delay(1000);
+	chassis.waitUntilDone();
 	ExpansionClamp.set_value(true);
+	Intake.move_velocity(600);
+
 	pros::delay(1000);
 	chassis.turnToHeading(180, 1000);
 	chassis.follow(L4BLUE_txt, 15, 2500);
 	pros::delay(1000);
-	Intake.move_velocity(0);
-	chassis.turnToHeading(90, 1000);
-	
-	//chassis.follow(L5BLUE_txt, 15, 2500);
+	chassis.turnToHeading(270, 1000);
 }
 
 

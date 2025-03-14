@@ -59,6 +59,8 @@ bool IntakeState = false;
 int position = 15000;
 double Hue;
 
+bool Sort = true;
+
 pros::ADIDigitalOut ExpansionClamp('A');
 pros::ADIDigitalOut Doinker('B');
 pros::ADIDigitalOut IntakeLift('H');
@@ -196,7 +198,7 @@ void ColorSort()
 	int start_count;
 	Color_sensor.set_led_pwm(50);
 
-	while(true)
+	while(Sort == true)
 	{
 		if(AllianceBlue == true)
 		{	
@@ -227,7 +229,6 @@ void ColorSort()
 		pros::delay(5);
 	}
 }
-
 
 void SetDrive(int Lspeed, int Rspeed)
 {
@@ -1032,6 +1033,21 @@ void opcontrol()
 
         chassis.arcade(leftY, rightX);
 
+		//COLOR SORT SWITCH
+		if(master.get_digital_new_press(DIGITAL_R2))
+		{
+			if(Sort == true)
+			{
+				Sort = false;
+			}
+			else
+			{
+				Sort = true;
+			}
+			printf("ColorSort=%d \n", Sort);
+		}
+
+
 		//INTAKE CONTROL
 		if(master.get_digital_new_press(DIGITAL_A))
 		{
@@ -1103,23 +1119,6 @@ void opcontrol()
 			}
 			printf("Expansion state=%d \n", DoinkerState);
 		}
-
-        //INTAKE LIFT FOR TESTING
-		/*if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
-		{
-			if(IntakeLiftState == true)
-			{
-				IntakeLift.set_value(LOW);
-				IntakeLiftState= false;
-			}
-			else
-			{
-				IntakeLift.set_value(HIGH);
-				IntakeLiftState = true;
-			}
-			printf("Expansion state=%d \n", IntakeLiftState);
-		}*/
-
 
 		//LADYBROWN CONTROL
 

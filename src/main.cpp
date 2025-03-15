@@ -499,6 +499,7 @@ void RED_Right_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(R5RED_txt, 15, 2500);
+	position = -60000;
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -565,6 +566,7 @@ void BLUE_Right_side_awp() {
 	chassis.turnToHeading(180, 2000);
 	chassis.waitUntilDone();
 	chassis.follow(R6BLUE_txt, 15, 2000, true);
+	position = -60000;
 }
 
 // Blue Alliance Right Side elimination rounds
@@ -632,6 +634,7 @@ void RED_LEFT_side_awp() {
 	chassis.turnToHeading(180, 2000);
 	chassis.waitUntilDone();
 	chassis.follow(L6RED_txt, 15, 2000, true);
+	position = -60000;
 	
 
 
@@ -700,6 +703,7 @@ void BLUE_LEFT_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(L5BLUE_txt, 15, 2500);
+	position = -60000;
 
 
 }
@@ -1025,6 +1029,7 @@ void opcontrol()
 	if (false) {
 		AllianceBlue = true;
 	}
+	position = 905;
 
 	while(true){
 
@@ -1125,30 +1130,30 @@ void opcontrol()
 		//SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
-			position = -60000;
+			position = -80000;
 		}
 
 		//STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			position = 18000;
+			position = 905;
 		}
 
 		//HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			position = -12000;
+			position = -27000;
 		}
 
 		//ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			position = 3500;
+			position = -14000;
 		}
 		
 		// printf("Alliance=%d", AllianceBlue);
 		// printf("Conveyor=%f, Intake=%f \n", IntakeConveyor.get_actual_velocity(), Intake.get_actual_velocity());
-		//printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
+		printf("angle=%d, postition=%d \n", LadyBrownRotate.get_angle(), LadyBrownRotate.get_position());
 		printf("angle=%f \n", imu.get_rotation());
 
 		pros::delay(10);

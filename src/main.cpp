@@ -56,7 +56,7 @@ bool LadyBrownState;
 bool AllianceBlue;
 bool top_speed = false;
 bool IntakeState = false;
-int position = 15000;
+int position = 31000;
 double Hue;
 
 bool Sort = true;
@@ -144,6 +144,7 @@ void LadyBrownArm()
 	int SERT;
 	int SERT_count = 0;
 	bool SERT_bool = false;
+	LadyBrownRotate.set_position(31000);
 
 	errorTerm = position - LadyBrownRotate.get_position();
 
@@ -471,7 +472,6 @@ void RED_Right_side_awp() {
 	AllianceBlue = false;
 	IntakeConveyor.move_velocity(0);
 	Intake.move_velocity(0);
-	AllianceBlue = true;
 	chassis.setPose(-49.934, -57.707, 270);
 	IntakeConveyor.move_velocity(0);
 	chassis.follow(R1RED_txt, 15, 5000, false);
@@ -499,7 +499,7 @@ void RED_Right_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(R5RED_txt, 15, 2500);
-	position = -60000;
+	//position = -30000;
 }
 
 // RED Alliance Right Side for elimination rounds
@@ -507,7 +507,6 @@ void RED_Right_side_elims() {
 	AllianceBlue = false;
 	IntakeConveyor.move_velocity(0);
 	Intake.move_velocity(0);
-	AllianceBlue = true;
 	chassis.setPose(-49.934, -57.707, 270);
 	IntakeConveyor.move_velocity(0);
 	chassis.follow(R1RED_txt, 15, 5000, false);
@@ -566,7 +565,7 @@ void BLUE_Right_side_awp() {
 	chassis.turnToHeading(180, 2000);
 	chassis.waitUntilDone();
 	chassis.follow(R6BLUE_txt, 15, 2000, true);
-	position = -60000;
+	//position = -30000;
 }
 
 // Blue Alliance Right Side elimination rounds
@@ -634,7 +633,7 @@ void RED_LEFT_side_awp() {
 	chassis.turnToHeading(180, 2000);
 	chassis.waitUntilDone();
 	chassis.follow(L6RED_txt, 15, 2000, true);
-	position = -60000;
+	//position = -30000;
 	
 
 
@@ -675,7 +674,6 @@ void BLUE_LEFT_side_awp() {
 	AllianceBlue = true;
 	IntakeConveyor.move_velocity(0);
 	Intake.move_velocity(0);
-	AllianceBlue = true;
 	chassis.setPose(49.934, -57.707, 90);
 	IntakeConveyor.move_velocity(0);
 	chassis.follow(L1BLUE_txt, 15, 5000, false);
@@ -703,7 +701,7 @@ void BLUE_LEFT_side_awp() {
 	pros::delay(1000);
 	chassis.turnToHeading(0, 1000);
 	chassis.follow(L5BLUE_txt, 15, 2500);
-	position = -60000;
+	//position = -30000;
 
 
 }
@@ -713,7 +711,6 @@ void BLUE_LEFT_side_elims() {
 	AllianceBlue = true;
 	IntakeConveyor.move_velocity(0);
 	Intake.move_velocity(0);
-	AllianceBlue = true;
 	chassis.setPose(49.934, -57.707, 90);
 	IntakeConveyor.move_velocity(0);
 	chassis.follow(L1BLUE_txt, 15, 5000, false);
@@ -921,10 +918,10 @@ void initialize() {
     }
 	};
 
-	pros::Task ColorSortTask{[=] {
+	/*pros::Task ColorSortTask{[=] {
         ColorSort();
     }
-	};
+	};*/
 	
     pros::Task screen_task([&]() {
         while (true) {
@@ -1029,7 +1026,7 @@ void opcontrol()
 	if (false) {
 		AllianceBlue = true;
 	}
-	position = 905;
+	position = 31000;
 
 	while(true){
 
@@ -1050,6 +1047,12 @@ void opcontrol()
 				Sort = true;
 			}
 			printf("ColorSort=%d \n", Sort);
+		}
+
+		//MANUAL LADYBROWN
+		if(master.get_digital_new_press(DIGITAL_L2))
+		{
+			
 		}
 
 
@@ -1130,25 +1133,25 @@ void opcontrol()
 		//SCORE
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP))
 		{
-			position = -80000;
+			position = -37000;
 		}
 
 		//STOW
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN))
 		{
-			position = 905;
+			position = 31000;
 		}
 
 		//HOLD
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT))
 		{
-			position = -27000;
+			position = 5000;
 		}
 
 		//ARM
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT))
 		{
-			position = -14000;
+			position = 22000;
 		}
 		
 		// printf("Alliance=%d", AllianceBlue);
